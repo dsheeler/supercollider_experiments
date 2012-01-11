@@ -1,0 +1,1468 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:44:24 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 01 - Language Basics) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2007, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      0\) The semicolon and running a program) s
+5 266 M
+(//      1\) Comments, posting and help) s
+5 258 M
+(//      2\) Variables) s
+5 250 M
+(//      3\) Functions) s
+5 242 M
+(//      4\) Lists and Arrays) s
+5 234 M
+(//      5\) Dataflow) s
+5 226 M
+(//      6\) Looping and iterating) s
+5 218 M
+(//      7\) Peaking under the hood) s
+5 210 M
+(//      8\) Creating classes) s
+5 162 M
+(// 0\) ========= The semicolon and running a program ==========) s
+5 146 M
+(// First of all. Most computer languages start counting at 0. So does SC) s
+5 130 M
+(/*) s
+5 122 M
+(The semicolon \(;\) is what divides one instruction from the next. ) s
+5 114 M
+(It is a line of code. After the semicolon, the interpreter looks at next line.) s
+5 106 M
+(There has to be semicolon after each line of code. Otherwise you get lots of errors.) s
+5 98 M
+(*/) s
+5 74 M
+(// double click behind the first bracket and the whole code is highlighted) s
+5 66 M
+(// what is between the brackets is a program. Hit ENTER \(not RETURN\) to run it.) s
+5 58 M
+(\() s
+5 50 M
+("you ran the program and ".post; \(44+77\).post; " is the sum of 44 + 77".postln;) s
+5 42 M
+("and this is the next line - the interpreter posts it twice as it's the last line of t) s
+5 34 M
+(he program.".postln;) s
+5 26 M
+(\)) s
+5 10 M
+(// the following will not work. Why not?) s
+5 2 M
+(\() s
+377 482 M
+(\(44+77\).postln) s
+377 474 M
+(55.postln;) s
+377 466 M
+(\)) s
+377 458 M
+(// note that the \245 sign is where the interpreter finds the error) s
+377 442 M
+(// you can also place a cursor somewhere on the line where the code is and hit ENTER) s
+377 434 M
+(\(44+77\).postln; 55.postln; "this line is posted twice".postln;) s
+377 394 M
+(// 1\) ========= Comments, posting and help ==========) s
+377 370 M
+(// this is a comment) s
+377 354 M
+(/*) s
+377 346 M
+(And this is ) s
+377 338 M
+(also a comment) s
+377 330 M
+(*/) s
+377 314 M
+(// Comments are red by default \(in the Format menu choose syntax colorize\)) s
+377 290 M
+(// We try the post window \(the output from the interpreter\):) s
+377 282 M
+(// \(place the cursor on the line and hit the ENTER button \(not RETURN\)\)) s
+377 258 M
+("hello".post; // post something) s
+377 242 M
+("hello there".postln; // post something and make a line break) s
+377 226 M
+(1+4;) s
+377 202 M
+(// you can also use postf:) s
+377 186 M
+(// a postf example inside a function \(we will learn about them later\):) s
+377 178 M
+(\() s
+377 170 M
+(f = {|a, b|     ) s
+377 162 M
+(        "the first value is %,  and the second one is  % \\n".postf\(a, b\);) s
+377 154 M
+(};) s
+377 138 M
+(f.value\(33,44\);) s
+377 130 M
+(f.\(777,888\) // here we use a shortcut and skip writing "value" - same as the line abov) s
+377 122 M
+(e) s
+377 114 M
+(\)) s
+377 98 M
+(// NOTE:  the "|a,b|" is the same as writing "arg a, b";) s
+377 90 M
+(// and "\\n" means RETURN in Unix speak) s
+377 74 M
+(// if you are posting a long list you might not get the whole list using .postln;) s
+377 66 M
+(// for that use the following:) s
+377 50 M
+(Post << "hey") s
+377 34 M
+(// example) s
+377 18 M
+(Array.fill\(1000, {100.rand}\).postln; // you see you get ...etc...) s
+377 2 M
+(// whereas) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(Post << Array.fill\(1000, {100.rand}\) // you get the whole list) s
+5 450 M
+(// HELP) s
+5 434 M
+(// if you want to read the help file for Array, highlight the word and hit ) s
+5 426 M
+(// Apple + d \(for the documentation file\)) s
+5 410 M
+(// Also, if you want to read and browse all the documentation, you can open a help bro) s
+5 402 M
+(wser:) s
+5 394 M
+(Help.gui) s
+5 362 M
+(// 2\) ========= Variables ==========) s
+5 346 M
+(// SuperCollider is not strongly typed so you don't need to declare the data type of v) s
+5 338 M
+(ariables) s
+5 330 M
+(// \(data types \(in other languages\) include : integer, float, double, string, custom o) s
+5 322 M
+(bjects, etc...) s
+5 306 M
+(a = 3; // we assign the number 3 to the variable "a") s
+5 298 M
+(a = "hello"; // we can also assign a string to it.) s
+5 290 M
+(a = 0.333312; // or a floating point number;) s
+5 282 M
+(a = [1, 34, 55, 0.1, "string in a list", \\symbol, pi]; // or an array) s
+5 266 M
+(a // hit this line and we see in the post window what "a" contains) s
+5 242 M
+(// local variables - they are declared inside the scope of the brackets or a function.) s
+5 234 M
+(\() s
+5 226 M
+(var v, a;) s
+5 218 M
+(v = 22;) s
+5 210 M
+(a = 33;) s
+5 202 M
+(\)) s
+5 186 M
+(v // hit this line and watch the post window ) s
+5 178 M
+(a // hit this line and watch the post window - still our old "a" from above) s
+5 154 M
+(// so a is a global variable \(in SC by default a to z can be global\).) s
+5 146 M
+(// a variable with the name "myvar" could not be global. - only single letters) s
+5 122 M
+(// For that we need environmental variables \(using the ~ sign\):) s
+5 106 M
+(~myvar = 333;) s
+5 90 M
+(~myvar // post it;) s
+5 58 M
+(// 3\) ========= Functions ==========) s
+5 42 M
+(// Functions in SuperCollider are within curly brackets {}) s
+5 26 M
+(f = {44.postln};) s
+5 18 M
+(f.value // to call the function we need to get its .value) s
+5 2 M
+(f = {   arg a, b; // arguments are inputs into a function) s
+377 482 M
+(                c = a+b; ) s
+377 474 M
+(                \("c equals : " + c\).postln;) s
+377 466 M
+(                c+c // and just to show that the function always returns the last line) s
+377 458 M
+( of code) s
+377 450 M
+(        }) s
+377 434 M
+(f.value\(3,4\) // f is now especting two arguments ) s
+377 418 M
+(x = f.value\(22,34\);) s
+377 410 M
+(x // we have now stored the last value of the function above in our x variable) s
+377 394 M
+(// arguments can also be defined inside two "|"s - example:) s
+377 378 M
+(f = {|string| string.postln;}) s
+377 362 M
+(f.\("hi there"\) // and you can skip the .value and write just a .) s
+377 322 M
+(// 4\) ========= Lists and Arrays ==========) s
+377 298 M
+(a = [1,2,3,4,5,6]; // an array) s
+377 282 M
+(// the same as above) s
+377 274 M
+(a = Array.fill\(6, {arg i; i+1}\); ) s
+377 258 M
+(a.do\({arg i; \(i*i\).postln;}\); // we can perform actions on the array) s
+377 242 M
+(// let's look at a) s
+377 234 M
+(a) s
+377 218 M
+(// we can now scramble the list:) s
+377 210 M
+(a.scramble) s
+377 194 M
+(// but a is still the original a) s
+377 186 M
+(a) s
+377 170 M
+(// if you want to change "a" to the result of the operation, you have to assign it to ) s
+377 162 M
+("a") s
+377 154 M
+(a = a.scramble  // an Array has many methods such as scramble) s
+377 138 M
+(a = a.mirror            // mirror) s
+377 122 M
+(a = a.stutter   // stutter) s
+377 106 M
+(a = a.pyramid   // pyramid) s
+377 90 M
+(a // how does it look?) s
+377 74 M
+(a.sort // sort it ) s
+377 50 M
+(// we can get at elements within the array) s
+377 42 M
+(a[1]) s
+377 26 M
+(a[1] = [22,33,44,3] // or add elements to the array) s
+377 10 M
+(a.add\(44\) // cannot add more than few times \(arrays cannot grow infinitly\) ) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(// instead use this:) s
+5 466 M
+(a = a.add\(44\);) s
+5 450 M
+(// or just use List \(which can grow\)) s
+5 434 M
+(a = List.new;) s
+5 426 M
+(a.add\(333\); // run this line many times) s
+5 418 M
+(a.add\(33\)) s
+5 410 M
+(a.add\("ss"\)) s
+5 402 M
+(a.add\(\\sgg\)) s
+5 386 M
+(a.insert\(0, 2222\)) s
+5 362 M
+(// see: ArrayedCollection helpfile for methods of both Array and List) s
+5 346 M
+(// .add, .insert, .scramble, etc. are METHODS of the Array Class.) s
+5 338 M
+(// TIP: to view all methods of Array, do:) s
+5 322 M
+(Array.dumpInterface) s
+5 306 M
+(// to view all inherited methods \(yes! object orientated, see wikipedia\)) s
+5 290 M
+(Array.dumpFullInterface) s
+5 258 M
+(// 5\) ========= Dataflow \(if-else & case\) ==========) s
+5 242 M
+(/* ) s
+5 234 M
+(All programming languages have different ways of controlling data.) s
+5 226 M
+(The most basic \(but sufficient\) are if-statements and case-statements.) s
+5 218 M
+(*/) s
+5 202 M
+(// -> if\(condition, {then do this}, {else do this}\);) s
+5 186 M
+(// the Boolean values true and false are keywords in SuperCollider language:) s
+5 178 M
+(// \(check the class "Boolean"\) ) s
+5 170 M
+(if\(true, {"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 162 M
+(if\(false, {"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 146 M
+(// so:) s
+5 138 M
+(if\(3==3, {"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 130 M
+(if\(3==4, {"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 114 M
+(// a tautology:) s
+5 106 M
+(true.if\({"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 98 M
+(// same as:) s
+5 90 M
+(if\(true, {"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 74 M
+(// and here we have an array that has two items and chooses either of them) s
+5 66 M
+([true,false].choose.if\({"condition is TRUE".postln;}, {"condition is FALSE".postln;}\)) s
+5 58 M
+(// how would that look in the if syntax above?) s
+5 34 M
+(/*) s
+5 26 M
+(// comparison operators are: ) s
+5 18 M
+( == \(equals\)) s
+5 10 M
+( < \(less than\)) s
+5 2 M
+( > \(more than\)) s
+377 482 M
+( != \(not equals\)) s
+377 474 M
+( <= \(more than or equals to\)) s
+377 466 M
+( >= \(less than or equals to\)) s
+377 458 M
+(*/) s
+377 442 M
+(// try to run the following lines and watch the post window:) s
+377 434 M
+(3==4) s
+377 426 M
+(3!=4) s
+377 418 M
+(3>=4) s
+377 410 M
+(3<=4) s
+377 402 M
+(3<=3) s
+377 386 M
+(// Now let's make an array with all the prime numbers up to 10000) s
+377 370 M
+(\() s
+377 362 M
+(p = List.new;) s
+377 354 M
+(10000.do\({arg i; // i is the iteration from 0 to 10000) s
+377 346 M
+(        if\(i.isPrime, {p.add\(i\)}\); // there is no else condition here, we don't need i) s
+377 338 M
+(t) s
+377 330 M
+(}\);) s
+377 322 M
+(Post << p;) s
+377 314 M
+(\)) s
+377 298 M
+(// i.isPrime means that it's checking if the number is prime or not \(true or false\)) s
+377 274 M
+(// a case statement is the same as if, just more efficient if checking many conditions) s
+377 266 M
+(.) s
+377 250 M
+(/*) s
+377 242 M
+(example:) s
+377 226 M
+(case) s
+377 218 M
+({condition} {action}) s
+377 210 M
+({condition} {action}) s
+377 202 M
+(etc.) s
+377 194 M
+(*/) s
+377 178 M
+(\() s
+377 170 M
+(a = 2;) s
+377 162 M
+(case) s
+377 154 M
+({a == 1} {"a equals 1".postln;}) s
+377 146 M
+({a == 2} {"a equals 2".postln;}) s
+377 138 M
+({a == 3} {"a equals 3".postln;}) s
+377 130 M
+({a == 4} {"a equals 4".postln;};) s
+377 122 M
+(\)) s
+377 114 M
+(// note the semicolon only after the last testing condition.) s
+377 106 M
+(// \(so the line evaluation goes from "case...... to that semicolon" \)) s
+377 66 M
+(// 6\) ========= Looping and iterating ==========) s
+377 42 M
+(// looping is also an important dataflow technique ) s
+377 26 M
+(// the argument is the iteration for each loop repitition:) s
+377 18 M
+(10.do\({arg counter; counter.postln;}\);) s
+377 2 M
+(// you can call it anything:) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 4 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (4) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(10.do\({arg num; num.postln;}\);) s
+5 466 M
+(// a convention is to use the character "i" \(for iteration\):) s
+5 458 M
+(10.do\({arg i; i.postln;}\);) s
+5 442 M
+(// when looping trough lists/arrays, there are 2 arguments \(as opposed to above\)) s
+5 434 M
+(// the item in the list and the counter;) s
+5 426 M
+([11,22,33,44,55,66,77,88,99].do\({arg item, counter; counter.post; " : ".post; item.pos) s
+5 418 M
+(tln;}\)) s
+5 394 M
+(// for is also a looping technique) s
+5 386 M
+(for\(100, 130, {|i| i = i+10; i.postln;}\)) s
+5 370 M
+(// or forBy where there iteration is more than 1) s
+5 362 M
+(forBy\(100, 130, 4, {|i| i = i+10; i.postln;}\)) s
+5 346 M
+(// while is another one) s
+5 338 M
+(i = 1;) s
+5 330 M
+(while \({ i < 30 }, {  i = i + 1; i.postln; }\);) s
+5 298 M
+(// 7\) ========= Peaking under the hood ==========) s
+5 282 M
+(/*) s
+5 266 M
+(Each UGen or Class in SuperCollider has a class definition in a class file.) s
+5 258 M
+(These files are compiled ever time SuperCollider is started and become application) s
+5 250 M
+(environment we are using. SC is an "interpreted" language. \(As opposed to a "compiled") s
+5 242 M
+(language like C or Java\).) s
+5 226 M
+(- For checking the sourcefile, type Apple + Y \(or cmd + Y\) - SinOsc) s
+5 218 M
+(- For checking the implementations of a method \(which classes support it\), type Apple ) s
+5 210 M
+(+ Y - poll) s
+5 202 M
+(- For checking references to a method \(which classes support it\), type Shift + Apple +) s
+5 194 M
+( Y - poll) s
+5 170 M
+(UGen.dumpSubclassList // UGen is a class. Try dumping LFSaw for example) s
+5 154 M
+(UGen.browse  // examine methods interactively in a GUI \(OSX\)) s
+5 138 M
+(SinOsc.dumpFullInterface  // list all methods for the classhierarchically) s
+5 130 M
+(SinOsc.dumpMethodList  // list instance methods alphabetically) s
+5 122 M
+(SinOsc.openHelpFile) s
+5 106 M
+(*/) s
+5 82 M
+(// 7\) ========= Creating Classes ==========) s
+5 58 M
+(// ====== here is the TestClass \(save as TestClass.sc in the SCClassLib folder of SC \)) s
+5 50 M
+( ======) s
+5 18 M
+(TestClass {) s
+5 10 M
+(        ) s
+5 2 M
+(        classvar <>myvar; // classvariables) s
+377 482 M
+(        var <>addnr, >addnrSet, <addnrGet; // instance variables) s
+377 474 M
+(        // this is a normal constructor method) s
+377 466 M
+(        *new { arg argaddnr; ) s
+377 458 M
+(                ^super.new.initTest\(argaddnr\) ) s
+377 450 M
+(        }) s
+377 442 M
+(        ) s
+377 434 M
+(        initTest { arg argaddnr;) s
+377 426 M
+(                addnr = argaddnr ? 3;) s
+377 418 M
+(             // do initiation here) s
+377 410 M
+(        }) s
+377 402 M
+(        ) s
+377 394 M
+(        calc {arg a, b;) s
+377 386 M
+(                var c;) s
+377 378 M
+(                c = a+b;) s
+377 370 M
+(                ^c // return) s
+377 362 M
+(        }) s
+377 346 M
+(}) s
+377 330 M
+(TestClass2 : TestClass {) s
+377 322 M
+(        calc { arg a, b;) s
+377 314 M
+(                var c;) s
+377 306 M
+(                c = a * b + addnr;) s
+377 298 M
+(                ^c;) s
+377 290 M
+(        }) s
+377 282 M
+(        ) s
+377 274 M
+(        setAddNr_ { arg newnr;) s
+377 266 M
+(                addnr = newnr;) s
+377 258 M
+(        }) s
+377 250 M
+(        ) s
+377 242 M
+(        getAddNr {) s
+377 234 M
+(                ^addnr;) s
+377 226 M
+(        }) s
+377 218 M
+(}) s
+377 202 M
+(// ===========================================================================) s
+377 178 M
+(// and here we test the class) s
+377 162 M
+(t = TestClass.new) s
+377 146 M
+(t.calc\(3,4\)) s
+377 122 M
+(t = TestClass.new\(9\)) s
+377 106 M
+(t.addnr) s
+377 82 M
+(v = TestClass2.new) s
+377 66 M
+(v.calc\(3,4\)) s
+377 50 M
+(v.addnr_\(55\)) s
+377 42 M
+(v.addnr // our new class) s
+377 34 M
+(t.addnr // the other of course still is just 9) s
+377 18 M
+(v.addnrSet = 33 // we can set this number \(because of > \(a setter\) \)) s
+377 10 M
+(v.addnrSet_\(33\) // another way of setting a variable \(same as = \)) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 5 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (5) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(v.addnrGet = 33 // Wrong! we cannot set this number \( because it's a getter < \)) s
+5 450 M
+(// proper object orientated programming uses setter and getter methods ) s
+5 442 M
+(// \(rather than accessing variables directly\)) s
+5 418 M
+(// here we use the setAddNr_ method to set our variable.) s
+5 410 M
+(v.setAddNr_\(333\)) s
+5 402 M
+(// and we can look at it:) s
+5 394 M
+(v.addnr ) s
+5 386 M
+(// but should really look at it with the getter method we made:) s
+5 378 M
+(v.getAddNr) s
+5 346 M
+(// =============================== another test class ========================) s
+5 322 M
+(SonicArtsClass {) s
+5 314 M
+(        ) s
+5 306 M
+(        var win, textfield, textfield2, rect; // get text but set text2) s
+5 298 M
+(        var name, <>profession; // a getter and setter variable) s
+5 290 M
+(        var friends;) s
+5 274 M
+(        *new { arg name, rect, color; ) s
+5 266 M
+(                ^super.new.initSAClass\(name, rect, color\);) s
+5 258 M
+(                }) s
+5 250 M
+(        ) s
+5 242 M
+(        initSAClass { arg argname, argrect, color;) s
+5 234 M
+(                var scramblebutton;) s
+5 226 M
+(                ) s
+5 218 M
+(                rect = argrect;) s
+5 210 M
+(                name = argname;) s
+5 202 M
+(                win = SCWindow\(name, rect, resizable:false\).front;) s
+5 194 M
+(                win.view.background_\(color\);) s
+5 186 M
+(                textfield = SCStaticText\(win, Rect\(10, \(rect.height/2\)-30, rect.width,) s
+5 178 M
+( 30\)\);) s
+5 170 M
+(                textfield.string_\(""\);) s
+5 162 M
+(                textfield.font_\(Font\("Helvetica-Bold", 24\)\);) s
+5 154 M
+(                textfield2 = SCStaticText\(win, Rect\(10, \(rect.height/2\)+30, rect.width) s
+5 146 M
+(, 30\)\);) s
+5 138 M
+(                textfield2.string_\(""\);) s
+5 130 M
+(                textfield2.font_\(Font\("Helvetica-Bold", 14\)\);) s
+5 122 M
+(                scramblebutton = SCButton\(win, Rect\(10,10, 200, 30\)\)) s
+5 114 M
+(                                                .states_\([) s
+5 106 M
+(                                                        ["change friends color",Color.) s
+5 98 M
+(black,Color.clear]]) s
+5 90 M
+(                                                \)) s
+5 82 M
+(                                                .action_\({) s
+5 74 M
+(                                                        friends.do\({arg friend; friend) s
+5 66 M
+(.changeColor\(Color.rand\)}\);) s
+5 58 M
+(                                                }\);) s
+5 42 M
+(                friends = List.new;) s
+5 34 M
+(        }) s
+5 26 M
+(        ) s
+5 18 M
+(        speak_{arg string;) s
+5 10 M
+(                textfield.string_\(string\);) s
+5 2 M
+(        }) s
+377 474 M
+(        speak2_{arg string;) s
+377 466 M
+(                textfield2.string_\(string\);) s
+377 458 M
+(        }) s
+377 450 M
+(        ) s
+377 442 M
+(        updateGUI {) s
+377 434 M
+(                win.refresh;) s
+377 426 M
+(        }) s
+377 418 M
+(        ) s
+377 410 M
+(        addFriend {arg friend;) s
+377 402 M
+(                friends.add\(friend\);) s
+377 394 M
+(        }) s
+377 386 M
+(        ) s
+377 378 M
+(        getName {) s
+377 370 M
+(                ^name; // note the return symbol) s
+377 362 M
+(        }) s
+377 354 M
+(        ) s
+377 346 M
+(        setName_ {arg newname; // note the underscore used when you are setting) s
+377 338 M
+(                name = newname;) s
+377 330 M
+(        }) s
+377 322 M
+(        ) s
+377 314 M
+(        removeFriend {arg friend;) s
+377 306 M
+(                var friendindex;) s
+377 298 M
+(                friendindex = friends.indexOfEqual\(friend\);) s
+377 290 M
+(                friends.remove\(friendindex\);) s
+377 282 M
+(        }) s
+377 274 M
+(        ) s
+377 266 M
+(        showFriends {) s
+377 258 M
+(                var namesOfFriends;) s
+377 250 M
+(                namesOfFriends = List.new;) s
+377 242 M
+(                friends.do\({arg friend; namesOfFriends.add\(friend.getName\)}\);) s
+377 234 M
+(                textfield2.string_\(namesOfFriends.asString\);) s
+377 226 M
+(        }) s
+377 218 M
+(        ) s
+377 210 M
+(        getFriends {) s
+377 202 M
+(                ^friends) s
+377 194 M
+(        }) s
+377 186 M
+(        ) s
+377 178 M
+(        getFriendNames {) s
+377 170 M
+(                var namesOfFriends;) s
+377 162 M
+(                namesOfFriends = List.new;) s
+377 154 M
+(                friends.do\({arg friend; namesOfFriends.add\(friend.getName\)}\);) s
+377 146 M
+(                ^namesOfFriends;) s
+377 138 M
+(        }) s
+377 130 M
+(        ) s
+377 122 M
+(        changeColor {arg color;) s
+377 114 M
+(                win.view.background_\(color\);) s
+377 106 M
+(                win.update;) s
+377 98 M
+(        }) s
+377 90 M
+(}) s
+377 58 M
+(// ================== and here is some code to try the class) s
+377 34 M
+(a = SonicArtsClass\("john", Rect\(50, 800, 300, 200\), Color.red\)) s
+377 26 M
+(a.speak_\("Hi! I'm John"\)) s
+377 18 M
+(a.profession = "singer") s
+377 10 M
+(a.speak2_\("I am a" + a.profession\)) s
+_R
+S
+%%Page: (6) 6
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 6 def
+/fname (ixi_SC_tutorial_01.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_01.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (6) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(b = SonicArtsClass\("george", Rect\(350, 800, 300, 200\), Color.blue\)) s
+5 474 M
+(b.speak_\("Hi! I'm george"\)) s
+5 466 M
+(b.profession = "bass player") s
+5 458 M
+(b.speak2_\("I am a" + b.profession\)) s
+5 442 M
+(c = SonicArtsClass\("paul", Rect\(650, 800, 300, 200\), Color.green\)) s
+5 434 M
+(c.speak_\("Hi! I'm paul"\)) s
+5 426 M
+(c.profession = "guitarist") s
+5 418 M
+(c.speak2_\("I am a" + c.profession\)) s
+5 402 M
+(// let's fix the roles) s
+5 386 M
+(b.profession = "guitarist") s
+5 378 M
+(b.speak2_\("I am a" + b.profession\)) s
+5 370 M
+(c.profession = "bass player") s
+5 362 M
+(c.speak2_\("I am a" + c.profession\)) s
+5 346 M
+(a.addFriend\(b\)) s
+5 338 M
+(a.addFriend\(c\)) s
+5 330 M
+(a.showFriends) s
+5 314 M
+(b.showFriends) s
+5 306 M
+(c.showFriends) s
+5 290 M
+(b.addFriend\(a\)) s
+5 282 M
+(b.addFriend\(c\)) s
+5 274 M
+(b.showFriends // check his friends) s
+5 258 M
+(// what if john wants to change his name?) s
+5 242 M
+(a.setName_\("ringo"\);) s
+5 234 M
+(a.speak_\("Hi! I'm"+a.getName\)) s
+5 226 M
+(// we can get the name like this) s
+5 218 M
+(a.getName) s
+5 210 M
+(// but not like this:) s
+5 202 M
+(a.name) s
+5 194 M
+(// however, we can get the profession like this) s
+5 186 M
+(a.profession) s
+5 178 M
+(// WHY?) s
+5 170 M
+(// the reason is the < \(get\) and > \(set\) properties of the profession variable) s
+_R
+S
+%%Trailer
+%%Pages: 6
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

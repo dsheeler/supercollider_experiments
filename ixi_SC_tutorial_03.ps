@@ -1,0 +1,1014 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:45:34 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_03.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_03.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 03 - Controlling the Server) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) Tasks) s
+5 266 M
+(//      2\) Patterns) s
+5 258 M
+(//      3\) TempoClocks) s
+5 250 M
+(//      4\) GUI) s
+5 234 M
+(/*) s
+5 218 M
+(From one perspective we could see the server as the instrument and the language ) s
+5 210 M
+(is the performer. There are various ways of controlling synths on the server ) s
+5 202 M
+(from the language. We can use the language to create the algorithms to control) s
+5 194 M
+(our server \(using Tasks, Routines, Patterns and Clocks\) but we can also control) s
+5 186 M
+(it directly with a Graphical User Interface \(GUI\), MIDI, Human Interface Devices) s
+5 178 M
+(\(HID\) such as gamepads, Wacom Tablets, WiiMote, etc.) s
+5 162 M
+(We will get deeper into these things later in the tutorial.) s
+5 146 M
+(*/) s
+5 130 M
+(// we are using this synthdef) s
+5 114 M
+(\() s
+5 106 M
+(SynthDef\(\\stereosineWenv, {arg freq=333, amp=0.4, pan=0.0, dur=1; // we add a new argu) s
+5 98 M
+(ment) s
+5 90 M
+(        var signal, env;) s
+5 82 M
+(        env = EnvGen.ar\(Env.perc\(0.01, dur\), doneAction:2\); // doneAction gets rid of ) s
+5 74 M
+(the synth) s
+5 66 M
+(        signal = SinOsc.ar\(freq, 0, amp\) * env;) s
+5 58 M
+(        signal = Pan2.ar\(signal, pan\);) s
+5 50 M
+(        Out.ar\(0, signal\);) s
+5 42 M
+(}\).store) s
+5 34 M
+(\)) s
+5 2 M
+(// 1\) ========= Tasks and Routines ==========) s
+377 474 M
+(/*) s
+377 466 M
+(Tasks are streamlike processes that can be paused and restarted.) s
+377 458 M
+(Compare the Routine and Task helpfiles. Tasks are good for building) s
+377 450 M
+(things quickly and perform asynchronous actions.) s
+377 442 M
+(*/) s
+377 426 M
+(\() s
+377 418 M
+(t = Task\({) s
+377 410 M
+(                20.do\({arg i; // play 10 times. For infinite length, use : inf.do\(\);) s
+377 402 M
+(                        Synth\(\\stereosineWenv, [\\freq, 200+\(i*50\)]\);) s
+377 394 M
+(                        0.5.wait;) s
+377 386 M
+(                }\)) s
+377 378 M
+(}\);) s
+377 370 M
+(\)) s
+377 354 M
+(t.play;) s
+377 346 M
+(t.pause;) s
+377 338 M
+(t.resume;) s
+377 330 M
+(t.stop;) s
+377 306 M
+(// we could also use Routines:) s
+377 290 M
+(// we define the Routine:) s
+377 282 M
+(\() s
+377 274 M
+(r = Routine.new\({) s
+377 266 M
+(        10.do\({ arg a;) s
+377 258 M
+(                a.postln;) s
+377 250 M
+(                1.wait;) s
+377 242 M
+(        }\);) s
+377 234 M
+(        0.5.wait;) s
+377 226 M
+(        "routine finished!".postln;) s
+377 218 M
+(}\);) s
+377 210 M
+(\)) s
+377 194 M
+(// and then we run it:) s
+377 186 M
+(SystemClock.play\(r\);) s
+377 170 M
+(// we have to reset the routine to start it again:) s
+377 162 M
+(r.reset) s
+377 146 M
+(// we could also use AppClock \(good for GUI updates\)) s
+377 138 M
+(AppClock.play\(r\);) s
+377 122 M
+(// or this syntax:) s
+377 114 M
+(r.play\(AppClock\)) s
+377 74 M
+(// 2\) ========= Patterns ==========) s
+377 58 M
+(/*) s
+377 50 M
+(Patterns are interesting methods for creating musical structures in a rather) s
+377 42 M
+(high-level way. They are high-level abstractions of streams that use the) s
+377 34 M
+(TempoClock of the language to send control messages to the server. ) s
+377 18 M
+(They can be replaced and shifted in time \(quant\).) s
+377 10 M
+(See the Streams-Patterns-Events helpfiles under Help/Streams) s
+377 2 M
+(*/) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_03.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_03.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(SynthDescLib.global.read; // we read the synthdef to use with Patterns) s
+5 450 M
+(// here we put a pattern into a variable "a") s
+5 442 M
+(\() s
+5 434 M
+(a = Pdef.new\(\\example1, ) s
+5 426 M
+(                Pbind\(\\instrument, \\stereosineWenv, // using our sine synthdef) s
+5 418 M
+(                                        \\freq, Pseq\([220, 440, 660, 880], inf\), // fre) s
+5 410 M
+(q arg) s
+5 402 M
+(                                        \\dur, Pseq\([0.25, 0.5, 0.25, 0.5], inf\);  // d) s
+5 394 M
+(ur arg) s
+5 386 M
+(                \)) s
+5 378 M
+(\);) s
+5 370 M
+(\)) s
+5 354 M
+(a.play;) s
+5 346 M
+(a.pause) s
+5 338 M
+(a.resume) s
+5 314 M
+(// but we don't need to:) s
+5 306 M
+(\() s
+5 298 M
+(Pdef\(\\example2, ) s
+5 290 M
+(                Pbind\(\\instrument, \\stereosineWenv, // using our sine synthdef) s
+5 282 M
+(                                        \\freq, Pseq.new\([720, 770, 990, 880], inf\), //) s
+5 274 M
+( freq arg) s
+5 266 M
+(                                        \\dur, Pseq.new\([0.25, 0.5, 0.25, 0.5], inf\);  ) s
+5 258 M
+(// dur arg) s
+5 250 M
+(                \)) s
+5 242 M
+(\);) s
+5 234 M
+(\)) s
+5 210 M
+(Pdef\(\\example2\).play) s
+5 202 M
+(Pdef\(\\example2\).pause) s
+5 194 M
+(Pdef\(\\example2\).resume) s
+5 170 M
+(// Now, let's play them both together with a bit of timeshift) s
+5 154 M
+(\() s
+5 146 M
+(Pdef\(\\example1\).quant_\([2, 0, 0]\);) s
+5 138 M
+(Pdef\(\\example2\).quant_\([2, 0.25, 1]\); // offset by half a beat) s
+5 130 M
+(Pdef\(\\example1\).play;) s
+5 122 M
+(Pdef\(\\example2\).play;) s
+5 114 M
+(\)) s
+5 98 M
+(// and without stopping we redefine the example1 pattern:) s
+5 90 M
+(\() s
+5 82 M
+(Pdef\(\\example1, ) s
+5 74 M
+(                Pbind\(\\instrument, \\stereosineWenv, // using our sine synthdef) s
+5 66 M
+(                                        \\freq, Pseq.new\([) s
+5 58 M
+(                                                        Pseq.new\([220, 440, 660, 880],) s
+5 50 M
+( 4\),) s
+5 42 M
+(                                                        Pseq.new\([220, 440, 660, 880],) s
+5 34 M
+( 4\) * 1.5], // transpose the melody) s
+5 26 M
+(                                                inf\),) s
+5 18 M
+(                                        \\dur, Pseq.new\([0.25, 0.125, 0.125, 0.25, 0.5]) s
+5 10 M
+(, inf\);  // dur arg) s
+5 2 M
+(                \)) s
+377 482 M
+(\);) s
+377 474 M
+(\)) s
+377 450 M
+(// 3\) ========= TempoClocks ==========) s
+377 434 M
+(/* ) s
+377 426 M
+(TempoClock is one of 3 clocks awailable for timing organisation in SuperCollider.) s
+377 418 M
+(The others are SystemClock and AppClock. TempoClock is a scheduler like SystemClock,) s
+377 410 M
+(but it schedules in beats rather than milliseconds. AppClock is less accurate, but) s
+377 402 M
+(it can call Cocoa primitives and therefore to be used when GUI's need update from ) s
+377 394 M
+(a clock controlled process.) s
+377 378 M
+(TIP: when you get an error message that sounds like "... cannot be called from this pr) s
+377 370 M
+(ocess") s
+377 362 M
+(then you need to use an AppClock or put the function into a .defer function:) s
+377 354 M
+({myfunction.value}.defer) s
+377 346 M
+(*/) s
+377 330 M
+(\() s
+377 322 M
+(// get elapsed time, round up to next second) s
+377 314 M
+(v = Main.elapsedTime.ceil;) s
+377 298 M
+(// create two clocks starting at time v. ) s
+377 290 M
+(t = TempoClock\(2, 0, v\);) s
+377 282 M
+(u = TempoClock\(2, 0, v\);) s
+377 266 M
+(// start two functions at beat 0 in one clock and 0.5 in the other.) s
+377 258 M
+(t.schedAbs\(0, { arg beat, sec; Synth\(\\stereosineWenv, [\\freq, 300]\); 1 }\);) s
+377 250 M
+(u.schedAbs\(0.5, { arg beat, sec; Synth\(\\stereosineWenv, [\\freq, 600]\);) s
+377 242 M
+(                                beat.postln; ) s
+377 234 M
+(                                if\(beat%4==0.5, {Synth\(\\stereosineWenv, [\\freq, 1600]\)) s
+377 226 M
+(;}\); // every 4th beat) s
+377 218 M
+(                                if\(beat%16==0.5, { // every 16th beat) s
+377 210 M
+(                                        Task\({) s
+377 202 M
+(                                                3.do\({) s
+377 194 M
+(                                                         Synth\(\\stereosineWenv, [\\freq) s
+377 186 M
+(, 2000+\(rand\(1000\)\), \\dur, 0.1]\);) s
+377 178 M
+(                                                         0.1125.wait;) s
+377 170 M
+(                                                }\);) s
+377 162 M
+(                                        }\).play;) s
+377 154 M
+(                                }\);                                     ) s
+377 146 M
+(                        1) s
+377 138 M
+(                }\);) s
+377 130 M
+(\)) s
+377 114 M
+(t.stop) s
+377 106 M
+(u.stop) s
+377 66 M
+(/*) s
+377 58 M
+(Yet another trick to play sounds in SuperCollider is to use "fork" and schedule) s
+377 50 M
+(a pattern through looping. If you look at the source of .fork \(by hitting Apple+Y\) ) s
+377 42 M
+(you will see that it is essentially a Routine \(like above\), but it is making our) s
+377 34 M
+(lives easier by wrapping it up in one method.) s
+377 26 M
+(*/) s
+377 10 M
+(\() s
+377 2 M
+(var clock, waitTime;) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_03.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_03.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(waitTime = 2;) s
+5 474 M
+(clock = TempoClock\(2, 0\);) s
+5 458 M
+({ // a fork) s
+5 450 M
+(        "we start our program".postln; // and this is the end of this program) s
+5 442 M
+(        { // and we fork again \(play 10 sines\)) s
+5 434 M
+(                10.do\({|i|) s
+5 426 M
+(                        Synth\(\\stereosineWenv, [\\freq, 2000+\(rand\(1000\)\), \\dur, 0.1]\);) s
+5 418 M
+( ) s
+5 410 M
+(                        "synth nr : ".post; i.postln;) s
+5 402 M
+(                        \(waitTime/10\).wait; // wait for 100 milliseconds) s
+5 394 M
+(                }\);) s
+5 386 M
+(                "end of 1st fork".postln;) s
+5 378 M
+(        }.fork\(clock\);) s
+5 370 M
+(        ) s
+5 362 M
+(        waitTime.wait; // 10 * 100 milliseconds is 1 second. \(thus 1.wait\)) s
+5 354 M
+(        "finished waiting, now we play the 2nd fork".postln;) s
+5 346 M
+(        { // and now we play another fork where the frequency is lower) s
+5 338 M
+(                20.do\({|i|) s
+5 330 M
+(                        Synth\(\\stereosineWenv, [\\freq, 100+\(rand\(1000\)\), \\dur, 0.1]\);) s
+5 322 M
+(                        "synth nr : ".post; i.postln;) s
+5 314 M
+(                        \(waitTime/10\).wait;) s
+5 306 M
+(                }\);) s
+5 298 M
+(                "end of 2nd fork".postln;) s
+5 290 M
+(        }.fork\(clock\);) s
+5 282 M
+(        "end of program".postln; // and this is the end of this program) s
+5 274 M
+(}.fork\(clock\);) s
+5 258 M
+(\)) s
+5 250 M
+(                ) s
+5 242 M
+(/*) s
+5 234 M
+(Note that the interpreter reaches the end of the program before the last fork is finis) s
+5 226 M
+(hed playing.) s
+5 218 M
+(*/      ) s
+5 178 M
+(// 4\) ========= GUI ==========) s
+5 146 M
+(// we create a synth \(here a oscillator with 16 harmonics) s
+5 138 M
+(\() s
+5 130 M
+(SynthDef\(\\simpleSynth, {|freq, amp|) s
+5 122 M
+(        var signal, harmonics;) s
+5 114 M
+(        harmonics = 16;) s
+5 106 M
+(        signal = Mix.fill\(harmonics, {|i| ) s
+5 98 M
+(                                SinOsc.ar\(freq*\(i+1\), 1.0.rand, amp * harmonics.recipr) s
+5 90 M
+(ocal/\(i+1\)\) ) s
+5 82 M
+(                        }\);) s
+5 74 M
+(        Out.ar\(0, signal ! 2\);) s
+5 66 M
+(}\).send\(s\)) s
+5 58 M
+(\)) s
+5 34 M
+(\() s
+5 26 M
+(var synth, win;) s
+5 18 M
+(// we initialize the synth) s
+5 10 M
+(synth = Synth\(\\simpleSynth, [\\freq, 100, \\amp, 0]\);) s
+5 2 M
+(// specify the GUI window) s
+377 482 M
+(win = GUI.window.new\("simpleSynth", Rect\(100,100, 230, 90\), false\);) s
+377 474 M
+(// and place the frequency and amplitude sliders in the window) s
+377 466 M
+(GUI.staticText.new\(win, Rect\(10,10, 160, 20\)\).font_\(Font\("Helvetica", 9\)\).string_\("fre) s
+377 458 M
+(q"\);) s
+377 450 M
+(GUI.slider.new\(win, Rect\(40,10, 160, 24\)\)) s
+377 442 M
+(        .action_\({|sl| synth.set\(\\freq, [100, 2000, \\exp].asSpec.map\(sl.value\)\) }\);) s
+377 434 M
+(GUI.staticText.new\(win, Rect\(10,46, 160, 20\)\).font_\(Font\("Helvetica", 9\)\).string_\("amp) s
+377 426 M
+("\);) s
+377 418 M
+(GUI.slider.new\(win, Rect\(40,46, 160, 24\)\)) s
+377 410 M
+(        .action_\({|sl| synth.set\(\\amp, [0, 1.0, \\amp].asSpec.map\(sl.value\)\) }\);) s
+377 402 M
+(// we then create the window ) s
+377 394 M
+(win.front;) s
+377 386 M
+(\)) s
+_R
+S
+%%Trailer
+%%Pages: 3
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

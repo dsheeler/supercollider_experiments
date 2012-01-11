@@ -1,0 +1,944 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:45:25 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_02.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_02.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 02 - Server Basics) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) Booting the server) s
+5 266 M
+(//      2\) The play and scope functions) s
+5 258 M
+(//      3\) SynthDefs) s
+5 250 M
+(//      4\) Getting values back to the language ) s
+5 210 M
+(// 1\) ========= Booting the server ==========) s
+5 194 M
+(/*) s
+5 178 M
+(SuperCollider has an architecture of a sound server and a client \(the language\).) s
+5 162 M
+(The server is an independent program that can be communicated with using) s
+5 154 M
+(the OSC \(Open Sound Control\) protocol. All you need to know is its IP address) s
+5 146 M
+(\(such as "127.0.0.1" or check www.whatsmyip.org\) and its port \(default 57110\).) s
+5 130 M
+(All sound generation happens on the server and most of the control) s
+5 122 M
+(happens in the SC language \(sclang\) or any other programming language ) s
+5 114 M
+(or interface that sends OSC to the server.) s
+5 98 M
+(On OS X, by default two servers windows appear, localhost and internal. ) s
+5 90 M
+(The internal is part of the language and runs in the same memory space. ) s
+5 82 M
+(The localhost server is external to the language, so if it crashes, the ) s
+5 74 M
+(servers keeps working. Other supercollider clients \(sc-lang\) and other ) s
+5 66 M
+(programming languages \(on the network, for example\) could communicate to ) s
+5 58 M
+(the localhost server.) s
+5 42 M
+(The localhost server is the default server and it is stored in the) s
+5 34 M
+(global variable "s" \(by convention\).) s
+5 18 M
+(*/) s
+5 2 M
+(// s is the server:) s
+377 482 M
+(// \( if you open the class file of Main.sc, you will see how the "s" variable is set\)) s
+377 466 M
+(s.postln;) s
+377 458 M
+(s.addr) s
+377 450 M
+(s.name // the local host server is the default server \(see Main.sc file\)) s
+377 442 M
+(s.serverRunning // is it running?) s
+377 434 M
+(s.avgCPU // how much CPU is it using right now?) s
+377 418 M
+(// OK, we start the server:) s
+377 410 M
+(s.boot; // you'll see it starts the localhost server by default) s
+377 394 M
+(// if we want the internal server to be the default server:) s
+377 386 M
+(s.quit; // first we quit the localhost server \(which was the default one\)) s
+377 370 M
+(Server.default = s = Server.internal;) s
+377 362 M
+(// or in more understandable code:) s
+377 354 M
+(s = Server.internal;) s
+377 346 M
+(Server.default = s;) s
+377 338 M
+(s.boot;) s
+377 322 M
+(// in some cases we might want create our own server:) s
+377 314 M
+(// \(if you set up a server to be controlled over the network\)) s
+377 298 M
+(n = NetAddr\("127.0.0.1", 57200\); // IP \(get it from whatsmyip.org\) and port) s
+377 290 M
+(p = Server.new\("thor", n\);) s
+377 282 M
+(p.makeWindow; // make the gui window) s
+377 274 M
+(p.boot; // boot it) s
+377 258 M
+(// try the server:) s
+377 250 M
+({SinOsc.ar\(444\)}.play\(p\);) s
+377 242 M
+(// stop it) s
+377 234 M
+(p.quit;) s
+377 210 M
+(// but let us just use the default \(local\) server:) s
+377 202 M
+(Server.default = s = Server.local;) s
+377 194 M
+(s.boot;) s
+377 162 M
+(// 2\) ========= The play and scope functions ==========) s
+377 138 M
+(// Function \(see tutorial 1\) can play Unit Generators \(UGens\).) s
+377 130 M
+(// we try some unit generators \(UGens\) ) s
+377 114 M
+({SinOsc.ar\(333\)}.play // sine wave) s
+377 98 M
+({Saw.ar\(333\)}.play // saw wave) s
+377 82 M
+({LFTri.ar\(333\)}.play // triangle wave) s
+377 66 M
+(// if you want to scope the wave, use the internal server \(see last tutorial\)) s
+377 50 M
+(Server.default = s = Server.internal;) s
+377 42 M
+(s.boot;) s
+377 26 M
+({LFTri.ar\(333\)}.scope // triangle wave) s
+377 10 M
+({Saw.ar\(333\)}.scope // saw wave) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_02.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_02.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(// TIP: \(OS X\) Run UGen.browse to get a browser with all the UGens and their methods) s
+5 458 M
+(UGen.browse;) s
+5 426 M
+(// 3\) ========= SynthDefs ==========) s
+5 410 M
+(/*) s
+5 402 M
+(Synth definitions are UGen graphs written and compiled in SC language and sent) s
+5 394 M
+(to the server. That's what happens behind the scenes of Function-play) s
+5 386 M
+(\(just highlight \(Function:play\) and open class def to look at the source code\).) s
+5 370 M
+(What this means is that the synth def code is evaluated when the synth def is ) s
+5 362 M
+(COMPILED, not when a synth is instantiated. This means that there are things that) s
+5 354 M
+(cannot be passed as arguments from the synth, such as if statements, number of) s
+5 346 M
+(UGens and other things.) s
+5 338 M
+(*/) s
+5 322 M
+(// a synth definition of the above:) s
+5 306 M
+(\() s
+5 298 M
+(SynthDef\(\\sine, {arg freq=333, amp=0.4;) s
+5 290 M
+(        Out.ar\(0, SinOsc.ar\(freq, 0, amp\)\);) s
+5 282 M
+(}\).load\(s\) // we load the synthdef into the server) s
+5 274 M
+(\)) s
+5 258 M
+(Synth\(\\sine\); // try it!) s
+5 250 M
+(// now hit Apple \(or Ctrl\) + dot to stop the synthesis) s
+5 226 M
+(a = Synth\(\\sine, [\\freq, 777]\); // we assign the synth to a variable) s
+5 218 M
+(a.set\(\\freq, 444\) // set the frequency from outside) s
+5 210 M
+(a.set\(\\freq, 333\)) s
+5 202 M
+(a.set\(\\amp, 0.8\)) s
+5 186 M
+(a.free; // free the synth) s
+5 170 M
+(// check out the helpfiles for SynthDef and Synth) s
+5 154 M
+(// NOTE: We need the Out Ugen in a synth definition to tell the server) s
+5 146 M
+(// which audiobus the sound should go out of. \(0 is left, 1 is right\)) s
+5 130 M
+(// which leads up to the question: how to make a stereo signal:) s
+5 114 M
+(\() s
+5 106 M
+(SynthDef\(\\stereosine, {arg freq=333, amp=0.4, pan=0.0; // we add a new argument) s
+5 98 M
+(        var signal;) s
+5 90 M
+(        signal = SinOsc.ar\(freq, 0, amp\);) s
+5 82 M
+(        signal = Pan2.ar\(signal, pan\);) s
+5 74 M
+(        Out.ar\(0, signal\);) s
+5 66 M
+(}\).load\(s\) // we load the synthdef into the server) s
+5 58 M
+(\)) s
+5 42 M
+(Synth\(\\stereosine\); // try it!) s
+5 26 M
+(// kill the above with Apple+dot and then we run it again) s
+5 18 M
+(a = Synth\(\\stereosine, [\\freq, 777]\); // we assign the synth to a variable) s
+5 10 M
+(a.set\(\\freq, 444\) // set the frequency from outside) s
+5 2 M
+(a.set\(\\amp, 0.8\)) s
+377 474 M
+(// trying the panning) s
+377 466 M
+(a.set\(\\pan, -1\)) s
+377 458 M
+(a.set\(\\pan, 1\)) s
+377 450 M
+(a.set\(\\pan, 0\)) s
+377 434 M
+(a.free; // free the synth) s
+377 402 M
+(// try to run this line a few times and hear the sound build up and ) s
+377 394 M
+(// so do the synths \(and CPU\) on the server window) s
+377 378 M
+(Synth\(\\stereosine, [\\freq, rrand\(333,545\)]\);) s
+377 362 M
+(// the solution is to have an Envelope in the synth definition) s
+377 354 M
+(// check the EnvGen and Env helpfiles) s
+377 338 M
+(\() s
+377 330 M
+(SynthDef\(\\stereosineWenv, {arg freq=333, amp=0.4, pan=0.0; // we add a new argument) s
+377 322 M
+(        var signal, env;) s
+377 314 M
+(        env = EnvGen.ar\(Env.perc, doneAction:2\); // doneAction gets rid of the synth) s
+377 306 M
+(        signal = SinOsc.ar\(freq, 0, amp\) * env;) s
+377 298 M
+(        signal = Pan2.ar\(signal, pan\);) s
+377 290 M
+(        Out.ar\(0, signal\);) s
+377 282 M
+(}\).load\(s\) // we load the synthdef into the server) s
+377 274 M
+(\)) s
+377 258 M
+(Synth\(\\stereosineWenv\); // try it, and try some other Envelopes in stead of .perc) s
+377 242 M
+(// or with random freq:) s
+377 234 M
+(Synth\(\\stereosineWenv, [\\freq, rrand\(333,545\)]\);) s
+377 202 M
+(// 4\)  ========= Getting values back to the language  ========= ) s
+377 186 M
+(/*) s
+377 178 M
+(It can be necessary in some circumstances to get values from the sc synth) s
+377 170 M
+(back to the sc language. In order to do so we have two possibilities:) s
+377 162 M
+(- using the Poll \(for testing purposes - values displayed in the Post window\)) s
+377 154 M
+(- using SendTrig \(for getting values into variables and functions\)) s
+377 146 M
+(*/) s
+377 130 M
+(// ----- Using Poll ---- Check the Poll helpfile) s
+377 122 M
+(// Here we use poll to see the value of the XLine UGen) s
+377 114 M
+({XLine.kr\(44, 100000, 6\).poll\(Impulse.kr\(20\), "value"\)}.play) s
+377 98 M
+(// the poll needs an Impulse to know when to send back to the language) s
+377 90 M
+({SinOsc.ar\(LFSaw.ar\(0.75, 0, 100, 500\).poll\(Impulse.ar\(10\), "freq"\), 0, 0.5\) }.play) s
+377 74 M
+(// or simply) s
+377 66 M
+({MouseY.kr.poll}.play) s
+377 42 M
+(// ----- Using SendTrig ----- Check the SendTrig helpfile) s
+377 26 M
+(// here we need to create an OSCresponder in the language to listen to the server) s
+377 18 M
+(// \(as you remember the server and the language communicate through OSC\)) s
+377 2 M
+(// create the responder \(language listening to OSC messages from the server\)) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_02.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_02.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(\() s
+5 474 M
+(a = OSCresponderNode\(s.addr, '/tr', { arg time, responder, msg;) s
+5 466 M
+(        [time, responder, msg].postln;) s
+5 458 M
+(        ~freq = msg[3];) s
+5 450 M
+(}\).add;) s
+5 442 M
+(\)) s
+5 426 M
+(// create the OSC sender in the server \(SendTrig sends OSC messages when it's triggere) s
+5 418 M
+(d\)) s
+5 410 M
+(\() s
+5 402 M
+({) s
+5 394 M
+(        var freq;) s
+5 386 M
+(        freq = LFSaw.ar\(0.75, 0, 100, 500\);) s
+5 378 M
+(        SendTrig.kr\(Impulse.kr\(10\), 0, freq\);) s
+5 370 M
+(        SinOsc.ar\(freq, 0, 0.5\)) s
+5 362 M
+(}.play) s
+5 354 M
+(\)) s
+5 338 M
+(~freq // and we can see that the freq is now stored in a variable on the language) s
+5 322 M
+(a.remove; // remove the responder) s
+5 290 M
+(// --------- Using a Control Bus ---------------) s
+5 274 M
+(b = Bus.control\(s,1\); // we create a control bus \(not an audio bus\) - Check the Bus he) s
+5 266 M
+(lpfile) s
+5 250 M
+({Out.kr\(b, MouseX.kr\(20,22000\)\)}.play // and we run some UGen on the bus) s
+5 234 M
+(b.get\({|val| val.postln;}\); // then from the language we can poll \(ask for\) the value) s
+5 218 M
+(/*) s
+5 210 M
+(The language sends OSC message to the server and gets returned the value\).) s
+5 202 M
+(Check the source of Bus and find the .get method. You will see that the Bus class) s
+5 194 M
+(is using an OSCresponder underneith. It is therefore "asynchronous", meaning that) s
+5 186 M
+(it will not happen in the linear order of your code. \(language asking server for the v) s
+5 178 M
+(alue,) s
+5 170 M
+(server sending back to language. This takes time\)) s
+5 162 M
+(*/) s
+5 146 M
+(// here is a program that shows how b.get is asynchronous. The {}.play from above has ) s
+5 138 M
+(to be running.) s
+5 130 M
+(// note how the numbered lines of code appear in the post window "in the wrong order") s
+5 122 M
+(// it takes between 2 and 15 milliseconds to get the value on a 1000 MHz PPC computer) s
+5 114 M
+(\() s
+5 106 M
+(x = 0; y= 0;) s
+5 98 M
+(t = Task\({) s
+5 90 M
+(        inf.do\({) s
+5 82 M
+(                "1 - before b.get : ".post; x = Main.elapsedTime.postln;) s
+5 74 M
+(                b.get\({|val|    ) s
+5 66 M
+(                        "2 - ".post; val.postln; ) s
+5 58 M
+(                        y = Main.elapsedTime.postln;) s
+5 50 M
+(                        "the asynchronious process took : ".post; \(y-x\).post; "seconds) s
+5 42 M
+(".postln;) s
+5 34 M
+(                }\); //  this value is returned AFTER the next line) s
+5 26 M
+(                "3 - after b.get : ".post;  Main.elapsedTime.postln;    ) s
+5 18 M
+(                0.5.wait;) s
+5 10 M
+(        }\)) s
+5 2 M
+(}\).play;) s
+377 482 M
+(\)) s
+377 466 M
+(t.stop;) s
+_R
+S
+%%Trailer
+%%Pages: 3
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

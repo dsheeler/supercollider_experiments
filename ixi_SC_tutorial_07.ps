@@ -1,0 +1,1104 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:46:06 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_07.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_07.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 07 - Envelopes) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) Envelope generator) s
+5 266 M
+(//      2\) Envelope types) s
+5 258 M
+(//      3\) Triggers and gates) s
+5 250 M
+(//      4\) MIDI keyboard example) s
+5 210 M
+(// 1\) =========  Envelope generator  ==========) s
+5 194 M
+(// To create an envelope, we need an envelope generator) s
+5 186 M
+(// The envelope generator can calculate various types of envelopes) s
+5 178 M
+(// it contains the envelope and performs the doneActions \(what ) s
+5 170 M
+(// happens when the envelope ends\)) s
+5 146 M
+(EnvGen.ar\(envelope, gate, levelScale, levelBias, timeScale, doneAction\)) s
+5 130 M
+(doneActions:) s
+5 122 M
+(        ) s
+5 114 M
+(         0   do nothing when the envelope has ended.) s
+5 106 M
+(         1   pause the synth running, it is still resident.) s
+5 98 M
+(         2   remove the synth and deallocate it.) s
+5 90 M
+(         3   remove and deallocate both this synth and the preceeding node.) s
+5 82 M
+(         4   remove and deallocate both this synth and the following node.) s
+5 74 M
+(         5   remove and deallocate this synth ) s
+5 66 M
+(                and if the preceeding node is a group then do g_freeAll on it, else n_) s
+5 58 M
+(free it.) s
+5 50 M
+(         6   remove and deallocate this synth ) s
+5 42 M
+(                and if the following node is a group then do g_freeAll on it, else n_f) s
+5 34 M
+(ree it.) s
+5 26 M
+(         7   remove and deallocate this synth and all preceeding nodes in this group) s
+5 18 M
+(         8   remove and deallocate this synth and all following nodes in this group) s
+5 10 M
+(        ) s
+5 2 M
+(         9   remove and deallocate this synth and pause the preceeding node) s
+377 482 M
+(         10  remove and deallocate this synth and pause the following node) s
+377 474 M
+(         11  remove and deallocate this synth ) s
+377 466 M
+(                and if the preceeding node is a group then do g_deepFree on it, else n) s
+377 458 M
+(_free it.) s
+377 450 M
+(         12  remove and deallocate this synth ) s
+377 442 M
+(                and if the following node is a group then do g_deepFree on it, else n_) s
+377 434 M
+(free it.) s
+377 426 M
+(         13     remove and deallocate this synth and all other nodes in this group \(be) s
+377 418 M
+(fore and after\)) s
+377 386 M
+(// 2\) =========  Envelope typees  ==========) s
+377 370 M
+(// try running the following lines and look at the output:) s
+377 354 M
+(                Env.linen\(1, 2, 3, 0.6\).test.plot;) s
+377 346 M
+(                Env.triangle\(1, 1\).test.plot;) s
+377 338 M
+(                Env.sine\(1,1\).test.plot;) s
+377 330 M
+(                Env.perc\(0.05, 1, 1, -4\).test.plot;) s
+377 322 M
+(                Env.adsr\(0.02, 0.2, 0.25, 1, 1, -4\).test.plot;) s
+377 314 M
+(                Env.asr\(0.02, 0.5, 1, 1\).test.plot;) s
+377 306 M
+(                Env.cutoff\(1, 1\).test\(2\).plot;) s
+377 298 M
+(                // using .new you can define your own envelope) s
+377 290 M
+(                Env.new\([0, 1, 0.3, 0.8, 0], [2, 3, 1, 4],'sine'\).test.plot;) s
+377 282 M
+(                Env.new\([0,1, 0.3, 0.8, 0], [2, 3, 1, 4],'linear'\).test.plot;) s
+377 250 M
+(// 3\) =========  Triggers and gates  ==========) s
+377 218 M
+(// gate holds the EnvGen open. Here using Dust \(random impulses\) to trigger a new enve) s
+377 210 M
+(lope) s
+377 202 M
+({EnvGen.ar\(Env.adsr\(0.001, 0.8, 0, 0.01, 1\), Dust.ar\(1\)\) *  SinOsc.ar}.play) s
+377 186 M
+(// Here using Impulse \(periodic impulses\)) s
+377 178 M
+({EnvGen.ar\(Env.adsr\(0.0001, 0.8, 0, 0.01, 1\), Impulse.ar\(2\)\) *  SinOsc.ar}.play) s
+377 162 M
+(// With a doneAction: 2 we kill the synth after the first envelope) s
+377 154 M
+({EnvGen.ar\(Env.adsr\(0.0001, 0.8, 0, 0.01, 1\), Impulse.ar\(2\), doneAction:2\) *  SinOsc.a) s
+377 146 M
+(r}.play) s
+377 122 M
+(// Envelopes can be used everywhere in the code, not just for amplitude) s
+377 114 M
+(\() s
+377 106 M
+({) s
+377 98 M
+(        40.do\({) s
+377 90 M
+(                {       var freq, ratio, modulator, carrier;) s
+377 82 M
+(                        // create an array of 12 midinotes, choose one, change it to c) s
+377 74 M
+(ps and post it:) s
+377 66 M
+(                        freq = Array.fill\(12, {arg i; 60 + i}\).choose.midicps.postln; ) s
+377 58 M
+(                        ratio =  2; // EnvGen.ar\(Env.perc\(0.05, 1\)\); // try this) s
+377 50 M
+(                        ) s
+377 42 M
+(                        modulator = SinOsc.ar\(freq * ratio, 0, EnvGen.ar\(Env.sine\(0.5,) s
+377 34 M
+( 1\)\)*15\);) s
+377 26 M
+(                        carrier = SinOsc.ar\(freq + \(modulator * freq\), 0, 0.5\);) s
+377 18 M
+(                        ) s
+377 10 M
+(                        carrier *  EnvGen.ar\(Env.perc\(0.01, 1\), doneAction:2\)) s
+377 2 M
+(                }.play;) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_07.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_07.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(                1.wait;) s
+5 474 M
+(        }\);) s
+5 466 M
+(}.fork) s
+5 458 M
+(\)) s
+5 434 M
+(// Triggers) s
+5 418 M
+(// in the example above we saw how Dust and Impulse could be used to trigger) s
+5 410 M
+(// an envelope.) s
+5 394 M
+(// the trigger can be set from everywhere \(code, GUI, system, etc\)) s
+5 386 M
+(// \(but use "t_" in front of trigger arguments.) s
+5 370 M
+(\() s
+5 362 M
+(a = { arg t_gate = 1;) s
+5 354 M
+(        var freq;) s
+5 346 M
+(        freq = EnvGen.kr\(Env.new\([200, 200, 800], [0, 1.6]\), t_gate\);) s
+5 338 M
+(        SinOsc.ar\(freq,) s
+5 330 M
+(                0, 0.2) s
+5 322 M
+(        \) ! 2 ) s
+5 314 M
+(}.play;) s
+5 306 M
+(\)) s
+5 290 M
+(a.set\(\\t_gate, 1\)  // do this repeatedly) s
+5 274 M
+(a.free) s
+5 258 M
+(\() s
+5 250 M
+(a = { arg t_gate = 1;) s
+5 242 M
+(        var env;) s
+5 234 M
+(        env = EnvGen.kr\(Env.adsr, t_gate\);) s
+5 226 M
+(     ) s
+5 218 M
+(     SinOsc.ar\(888, 0, 1 * env\) ! 2 ) s
+5 210 M
+(}.play;) s
+5 202 M
+(\)) s
+5 186 M
+(a.set\(\\t_gate, 1\)  // do this repeatedly) s
+5 162 M
+(a.free) s
+5 114 M
+(// if you want to keep the same synth on the server and trigger it) s
+5 106 M
+(// from another process than the synthesis control parameter process) s
+5 98 M
+(// you can use gates and triggers for the envelope.) s
+5 82 M
+(// use doneAction:0 to keep the synth on the server after the envelope is finished) s
+5 66 M
+(// WITH A FLEXIBLE TIME ENVELOPE \(USING GATE\)) s
+5 58 M
+(SynthDef\(\\trigtest, {arg freq, amp, dur=1, gate;) s
+5 50 M
+(        var signal, env;) s
+5 42 M
+(        env = EnvGen.ar\(Env.adsr\(0.01, dur, amp, 0.7\), gate, doneAction:0\); ) s
+5 34 M
+(        signal = SinOsc.ar\(freq\) * env;) s
+5 26 M
+(        Out.ar\(0, signal\);) s
+5 18 M
+(}\).load\(s\)) s
+377 482 M
+(a = Synth\(\\trigtest, [\\freq, 333, \\amp, 1, \\gate, 1]\)) s
+377 474 M
+(a.set\(\\gate, 0\)) s
+377 450 M
+(a.set\(\\gate, 1\)) s
+377 442 M
+(a.set\(\\gate, 0\)) s
+377 426 M
+(a.set\(\\freq, 788\)) s
+377 410 M
+(a.set\(\\gate, 1\)) s
+377 402 M
+(a.set\(\\gate, 0\)) s
+377 370 M
+(// WITH A FIXED TIME ENVELOPE \(USING TRIGGER\)) s
+377 362 M
+(// here we use a t_trig to retrigger the synth) s
+377 354 M
+(SynthDef\(\\trigtest2, {arg freq, amp, dur=1, t_trig;) s
+377 346 M
+(        var signal, env;) s
+377 338 M
+(        env = EnvGen.ar\(Env.perc\(0.01, dur, amp\), t_trig, doneAction:0\); ) s
+377 330 M
+(        signal = SinOsc.ar\(freq\) * env;) s
+377 322 M
+(        Out.ar\(0, signal\);) s
+377 314 M
+(}\).load\(s\)) s
+377 290 M
+(a = Synth\(\\trigtest2, [\\freq, 333, \\amp, 1, \\t_trig, 1]\)) s
+377 274 M
+(a.set\(\\freq, 788\)) s
+377 266 M
+(a.set\(\\t_trig, 1\);) s
+377 258 M
+(a.set\(\\amp, 0.28\)) s
+377 250 M
+(a.set\(\\t_trig, 1\);) s
+377 234 M
+(a.set\(\\freq, 588\)) s
+377 226 M
+(a.set\(\\t_trig, 1\);) s
+377 218 M
+(a.set\(\\amp, 0.8\)) s
+377 210 M
+(a.set\(\\t_trig, 1\);) s
+377 170 M
+(// 4\) =========  MIDI keyboard example  ==========) s
+377 146 M
+(/* ) s
+377 138 M
+(In order to use MIDI, we connect our peripherals and make sure they are working.) s
+377 130 M
+(Then we ...) s
+377 114 M
+(a\) initialise the MIDIClient:) s
+377 106 M
+(MIDIClient.init;) s
+377 90 M
+(b\) start the MIDIIn responcer) s
+377 82 M
+(MIDIIn.connect;) s
+377 66 M
+(c\) then we define what midi methods we are waiting for - such as :) s
+377 58 M
+(noteOn ) s
+377 50 M
+(noteOff) s
+377 42 M
+(polytouch) s
+377 34 M
+(control) s
+377 26 M
+(program) s
+377 18 M
+(touch) s
+377 10 M
+(bend) s
+377 2 M
+(sysex) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_07.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_07.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(NOTE: all the synthdefs in these examples are quite boring and uninteresting.) s
+5 466 M
+(It's up to you to make them sound good!) s
+5 450 M
+(*/) s
+5 434 M
+(// Now we set up our MIDI functions:) s
+5 418 M
+(MIDIClient.init\(2,2\); // check how many sources you have \(in the post window\)) s
+5 410 M
+(// in my case: Sources: [ IAC Driver : IAC Bus 1, FireWire 410 : FireWire 410 ]) s
+5 402 M
+(MIDIIn.connect\(1, MIDIClient.sources.at\(1\)\);  // select the source you want \(I want th) s
+5 394 M
+(e FireWire 410 as source\)) s
+5 386 M
+(MIDIIn.noteOn = {arg src, chan, num, vel; [src, chan, num, vel].postln;};) s
+5 370 M
+(//MIDIIn.connect\(0, MIDIClient.sources.at\(0\).uid\);) s
+5 354 M
+(// this is the synthdef we are going to use) s
+5 346 M
+(\() s
+5 338 M
+(SynthDef\(\\midisynth1, { arg freq=440, filter=400, gate=0.0, vibrato=0.0;) s
+5 330 M
+(        var x;) s
+5 322 M
+(        x = Saw.ar\(freq * SinOsc.ar\(vibrato/20, 0, 1, 1\), 1\);) s
+5 314 M
+(        x = MidEQ.ar\(x, freq+filter, 0.3, 12\);) s
+5 306 M
+(        x = EnvGen.kr\(Env.adsr, gate, Latch.kr\(gate, gate\)\) * x;) s
+5 298 M
+(        Out.ar\(0, x!2\);) s
+5 290 M
+(}\).load\(s\);) s
+5 282 M
+(\)) s
+5 266 M
+(x = Synth\(\\midisynth1\);) s
+5 258 M
+(// let's try our synth) s
+5 242 M
+(x.set\(\\freq, 444\);) s
+5 234 M
+(x.set\(\\gate, 1 \);) s
+5 226 M
+(x.set\(\\vibrato, 20 \);) s
+5 218 M
+(x.set\(\\gate, 0 \);) s
+5 210 M
+(x.free;) s
+5 178 M
+(\() s
+5 170 M
+(//set the MIDI into action:) s
+5 162 M
+(x = Synth\(\\midisynth1\); // we are controlling the same synth, therefore no doneAction ) s
+5 154 M
+(in the envelope) s
+5 138 M
+(MIDIIn.noteOn = {arg src, chan, num, vel;) s
+5 130 M
+(                                x.set\(\\freq, num.midicps\);) s
+5 122 M
+(                                x.set\(\\gate, vel / 127 \);) s
+5 114 M
+(                                //x.set\(\\formfreq, vel / 127 * 1000\);) s
+5 106 M
+(                        };) s
+5 98 M
+(MIDIIn.noteOff = { arg src,chan,num,vel;) s
+5 90 M
+(                                x.set\(\\gate, 0.0\);) s
+5 82 M
+(                        };) s
+5 74 M
+(MIDIIn.bend = { arg src,chan,val;) s
+5 66 M
+(                                \(val * 0.048828125\).postln;) s
+5 58 M
+(                                //val.postln;) s
+5 50 M
+(                                x.set\(\\filter, val*0.148828125 \);) s
+5 42 M
+(                        };) s
+5 34 M
+(MIDIIn.control = {arg src, chan, num, vel;) s
+5 26 M
+(                        //vel.postln;) s
+5 18 M
+(                        x.set\(\\vibrato, vel \);) s
+5 10 M
+(}) s
+5 2 M
+(\)) s
+377 458 M
+(// the program above is monophonic.) s
+377 450 M
+(// for polyphony, we store each note in an array and control the array) s
+377 442 M
+(\() s
+377 434 M
+(SynthDef\(\\midisynth2, { arg freq=440, filter=400, gate=0.0, vibrato=0.0;) s
+377 426 M
+(        var x;) s
+377 418 M
+(        x = Saw.ar\(freq * SinOsc.ar\(vibrato/20, 0, 1, 1\), 1\);) s
+377 410 M
+(        x = MidEQ.ar\(x, freq+filter, 0.3, 12\);) s
+377 402 M
+(        x = EnvGen.kr\(Env.adsr, gate, Latch.kr\(gate, gate\), doneAction:2\) * x;) s
+377 394 M
+(        Out.ar\(0, x!2\);) s
+377 386 M
+(}\).load\(s\);) s
+377 378 M
+(\)) s
+377 354 M
+(\() s
+377 346 M
+(var poly;) s
+377 338 M
+(poly = Array.fill\(128, 0\); // array with all possible notes) s
+377 322 M
+(MIDIIn.noteOn = {arg src, chan, num, vel;) s
+377 314 M
+(        if\( poly[num].notNil \){) s
+377 306 M
+(                poly.put\(num, Synth\(\\midisynth2, [\\freq, num.midicps, \\gate, vel/127]\)) s
+377 298 M
+(\)) s
+377 290 M
+(        }{) s
+377 282 M
+(                \312// sustain pedal safety. if previous synth exists, free it.\312) s
+377 274 M
+(                poly[num].set\(\\gate, 0\); ) s
+377 266 M
+(                poly.put\(num, Synth\(\\midisynth2, [\\freq, num.midicps, \\gate, vel/127]\)) s
+377 258 M
+(\)) s
+377 250 M
+(        }) s
+377 242 M
+(};) s
+377 226 M
+(MIDIIn.noteOff = { arg src,chan,num,vel;) s
+377 218 M
+(        poly[num].set\(\\gate, 0\);) s
+377 210 M
+(};) s
+377 194 M
+(MIDIIn.bend = { arg src,chan,val;) s
+377 186 M
+(        poly.do\({arg synth; if\( synth!=0 , { synth.set\(\\filter, val*0.148828125 \) }\); ) s
+377 178 M
+(}\);) s
+377 170 M
+(};) s
+377 154 M
+(MIDIIn.control = {arg src, chan, num, vel;) s
+377 146 M
+(        poly.do\({arg synth; if\( synth!=0 , { synth.set\(\\vibrato, vel \) }\); }\);) s
+377 138 M
+(};) s
+377 114 M
+(\)) s
+377 74 M
+(////////// another way is to use the NoteOnResponder \(check the class file\)) s
+377 58 M
+(\() s
+377 50 M
+(SynthDef\(\\midisynth3, {|freq=400, gate=1, vol=1|\312) s
+377 42 M
+(        var signal;) s
+377 34 M
+(        signal = Saw.ar\(freq, vol\) * EnvGen.kr\(Env.asr\(0.1, 1, 1\), gate:gate, doneActi) s
+377 26 M
+(on:2\);) s
+377 18 M
+(        Out.ar\(0,\312signal!2\)) s
+377 10 M
+(}\).load\(s\);) s
+377 2 M
+(\)) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 4 def
+/fname (ixi_SC_tutorial_07.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_07.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (4) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(\() s
+5 466 M
+(var n, d, poly;) s
+5 458 M
+(poly = Array.fill\(128, 0\);) s
+5 450 M
+(n = NoteOnResponder\({|src,chan,num,veloc|\312) s
+5 442 M
+(        if\( poly[num].notNil \){) s
+5 434 M
+(                poly.put\(num, Synth\(\\midisynth3, [\\freq, num.midicps, \\vol, veloc/127]) s
+5 426 M
+(\)\)) s
+5 418 M
+(        }{) s
+5 410 M
+(                \312// sustain pedal safety. if previous synth exists, free it.\312) s
+5 402 M
+(                poly[num].set\(\\gate, 0\); ) s
+5 394 M
+(                poly.put\(num, Synth\(\\midisynth3, [\\freq, num.midicps, \\vol, veloc/127]) s
+5 386 M
+(\)\)) s
+5 378 M
+(        }) s
+5 370 M
+(}\);) s
+5 362 M
+(d = NoteOffResponder\({|src,chan,num,veloc| poly[num].set\(\\gate, 0\) }\);) s
+5 354 M
+(CmdPeriod.doOnce\({n.remove; d.remove}\); // on command + period, free the note responde) s
+5 346 M
+(rs \(on and off\)) s
+5 338 M
+(\)) s
+_R
+S
+%%Trailer
+%%Pages: 4
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

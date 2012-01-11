@@ -1,0 +1,1072 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:46:17 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_09.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_09.sc) def
+% User defined strings:
+/fmodstr (Thu Dec 15 05:53:37 2011) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 09 - Granular Synthesis) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) TGrains) s
+5 266 M
+(//      2\) Warp) s
+5 258 M
+(//      3\) Custom built grainular synthesis) s
+5 250 M
+(//      4\) The messaging style) s
+5 242 M
+(//      5\) Munger) s
+5 194 M
+(// 1\) =========  TGrains  ==========) s
+5 178 M
+(// TGrains is an SC UGen that performs granular synthesis) s
+5 162 M
+(b = Buffer.alloc\(s, 44100 * 2.0, 1\); // 2 seconds mono buffer) s
+5 146 M
+(\() s
+5 138 M
+(// we load our record and playback synth definitions) s
+5 130 M
+(SynthDef\(\\recBuf,{ arg out=0, bufnum=0;) s
+5 122 M
+(        var in;) s
+5 114 M
+(        in = AudioIn.ar\(1\);) s
+5 106 M
+(        RecordBuf.ar\(in, bufnum\);) s
+5 98 M
+(}\).load\(s\);) s
+5 82 M
+(SynthDef\(\\playBuf,{ arg out = 0, bufnum;) s
+5 74 M
+(        var signal;) s
+5 66 M
+(        signal = PlayBuf.ar\(1, bufnum, BufRateScale.kr\(bufnum\)\);) s
+5 58 M
+(        Out.ar\(out, signal ! 2\)) s
+5 50 M
+(}\).load\(s\)) s
+5 42 M
+(\)) s
+5 18 M
+(// we record into the buffer \(for ca 2 secs\)) s
+5 10 M
+(x = Synth\(\\recBuf, [\\out, 0, \\bufnum, b.bufnum]\);) s
+5 2 M
+(x.free;) s
+377 474 M
+(// test the buffer) s
+377 466 M
+(x = Synth\(\\playBuf, [\\bufnum, b.bufnum]\)) s
+377 442 M
+(// let's try TGrains:) s
+377 426 M
+(\() s
+377 418 M
+(SynthDef\(\\tgrains,{ arg out=0, buffer=0;) s
+377 410 M
+(        var signal, trate, dur;) s
+377 402 M
+(        trate = MouseY.kr\(1,30\);) s
+377 394 M
+(        dur = 2/trate;) s
+377 386 M
+(        signal =        TGrains.ar\(2, Impulse.ar\(trate\), buffer, 1, MouseX.kr\(0,BufDur) s
+377 378 M
+(.kr\(buffer\)\), dur, 0, 0.8, 2\);) s
+377 370 M
+(        Out.ar\(0, signal\)) s
+377 362 M
+(}\).load\(s\);) s
+377 354 M
+(\)) s
+377 338 M
+(g = Synth\(\\tgrains, [\\buffer, b.bufnum]\)) s
+377 330 M
+(g.free;) s
+377 322 M
+(// NOTE: The buffer can contain a wavetable created with .sine1, sine2, cheby, etc.) s
+377 314 M
+(// \(it doesn't have to be a "sample"\)) s
+377 274 M
+(// 2\) =========  The Warp ugens  ==========) s
+377 258 M
+(// \(Check the sourcecode for Warp1 \(hit Apple+Y on the name\) and look at the various) s
+377 250 M
+(// Granular UGens available apart from TGrains\)) s
+377 234 M
+(// Warp1 - warp a buffer with a warp factor \(stretching/compressing the buffer\)) s
+377 218 M
+(SynthDef\(\\warp, {arg buffer = 0, pointer =0.3;) s
+377 210 M
+(        var out;) s
+377 202 M
+(        // warp factor of 0.25 - stretch sound by 4 times) s
+377 194 M
+(        // freqScale of 1.5 - pitching the sound up by half octave) s
+377 186 M
+(        out = Warp1.ar\(1, buffer, MouseX.kr\(0,2\), MouseY.kr\(1.5, 0.5\), 0.1, -1, 8, 0.1) s
+377 178 M
+(5, 1.0\);) s
+377 170 M
+(        Out.ar\(0, out\);) s
+377 162 M
+(}\).send\(s\);) s
+377 146 M
+(g = Synth\(\\warp, [\\buffer, b.bufnum]\);) s
+377 106 M
+(// GrainIn - Grain a live input) s
+377 90 M
+(b = Buffer.alloc\(s, 44100 * 14.0, 1\); // 14 second mono buffer) s
+377 74 M
+(SynthDef\(\\grainin, {arg buffer = 0;) s
+377 66 M
+(        var out, pointer, filelength, env, dir;) s
+377 58 M
+(        out = GrainIn.ar\(1, Dust.ar\(20\), 0.1, AudioIn.ar\(1\)*0.4\);) s
+377 50 M
+(        Out.ar\(0, out\);) s
+377 42 M
+(}\).send\(s\);) s
+377 26 M
+(g = Synth\(\\grainin, [\\buffer, b.bufnum]\);) s
+377 18 M
+(g.free;) s
+377 2 M
+(// or another test:) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_09.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_09.sc) def
+% User defined strings:
+/fmodstr (Thu Dec 15 05:53:37 2011) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(\() s
+5 474 M
+(SynthDef\(\\sagrain, {arg amp=1, grainDur=0.1, grainSpeed=10, panWidth=0.5;) s
+5 466 M
+(        var pan, granulizer;) s
+5 458 M
+(        pan = LFNoise0.kr\(grainSpeed, panWidth\);) s
+5 450 M
+(        granulizer = GrainIn.ar\(2, Impulse.kr\(grainSpeed\), grainDur, Mix.ar\(AudioIn.ar) s
+5 442 M
+(\([1,2]\)\), pan\);) s
+5 434 M
+(        Out.ar\(0, granulizer * amp\);) s
+5 426 M
+(}\).send\(s\);) s
+5 418 M
+(\)) s
+5 402 M
+(x = Synth\(\\sagrain\)) s
+5 386 M
+(x.set\(\\grainDur, 0.02\)) s
+5 378 M
+(x.set\(\\amp, 0.02\)) s
+5 370 M
+(x.set\(\\amp, 1\)) s
+5 354 M
+(x.set\(\\grainDur, 0.1\)) s
+5 346 M
+(x.set\(\\grainSpeed, 5\)) s
+5 338 M
+(x.set\(\\panWidth, 1\)) s
+5 306 M
+(// 3\) =========  Custom built granular synthesis  ==========) s
+5 290 M
+(// the source here is a simple sinewave) s
+5 282 M
+(// and we use a Gaussian curve for the envelope of the grain \(Env.sine\)) s
+5 274 M
+(\() s
+5 266 M
+(SynthDef\(\\sineGrain, { arg freq = 800, amp = 0.1, dur = 0.1;) s
+5 258 M
+(        var signal;) s
+5 250 M
+(        signal = FSinOsc.ar\(freq, 0, EnvGen.kr\(Env.sine\(dur, amp\), doneAction: 2\)\);) s
+5 242 M
+(        OffsetOut.ar\(0, signal!2\); ) s
+5 234 M
+(}\).load\(s\);) s
+5 226 M
+(\)) s
+5 210 M
+(Synth\(\\sineGrain, [\\freq, 500, \\dur, 20.reciprocal]\) // 20 ms grain) s
+5 194 M
+(\() s
+5 186 M
+(Task\({) s
+5 178 M
+(   1000.do\({ ) s
+5 170 M
+(                Synth\(\\sineGrain, [     \\freq, rrand\(100, 200\), // ) s
+5 162 M
+(                                                        \\amp, rrand\(0.05,0.2\),) s
+5 154 M
+(                                                        \\dur, rrand\(0.06, 0.2\)) s
+5 146 M
+(                                                ]\);) s
+5 138 M
+(                0.01.wait;) s
+5 130 M
+(        }\);) s
+5 122 M
+(}\).start;) s
+5 114 M
+(\)) s
+5 90 M
+(// here the source is a buffer) s
+5 74 M
+(b = Buffer.read\(s, "sounds/a11wlk01-44_1.aiff"\);) s
+5 58 M
+(// now play it) s
+5 50 M
+(\() s
+5 42 M
+(SynthDef\(\\bufGrain,{ arg out = 0, bufnum, rate=1.0, amp = 0.1, dur = 0.1, startPos=0;) s
+5 34 M
+(        var signal;) s
+5 26 M
+(        signal = PlayBuf.ar\(1, bufnum, rate, startPos\) * EnvGen.kr\(Env.sine\(dur, amp\),) s
+5 18 M
+( doneAction: 2\);) s
+5 10 M
+(        OffsetOut.ar\(out, signal ! 2\)) s
+5 2 M
+(}\).load\(s\)) s
+377 482 M
+(\)) s
+377 466 M
+(Synth\(\\bufGrain, [\\bufnum, b.bufnum]\)) s
+377 442 M
+(\() s
+377 434 M
+(Task\({) s
+377 426 M
+(   1000.do\({ ) s
+377 418 M
+(                Synth\(\\bufGrain, [              \\bufnum, b.bufnum,) s
+377 410 M
+(                                                        \\rate, rrand\(0.8, 1.2\),) s
+377 402 M
+(                                                        \\amp, rrand\(0.05,0.2\),) s
+377 394 M
+(                                                        \\dur, rrand\(0.06, 0.2\),) s
+377 386 M
+(                                                        \\startPos, rrand\(133,666\)) s
+377 378 M
+(                                                ]\);) s
+377 370 M
+(                0.01.wait;) s
+377 362 M
+(        }\);) s
+377 354 M
+(}\).start;) s
+377 346 M
+(\)) s
+377 330 M
+(// another example:) s
+377 314 M
+(\() s
+377 306 M
+(SynthDef\(\\grain, {|freq, amp, dur, pan|) s
+377 298 M
+(                 var signal;) s
+377 290 M
+(                 signal = Pan2.ar\(SinOsc.ar\(freq, 0, amp\) *) s
+377 282 M
+(                                                EnvGen.ar\() s
+377 274 M
+(                                                                //Env.sine\(dur - 0.001) s
+377 266 M
+(\),  // two different envelopes) s
+377 258 M
+(                                                                Env.perc\(0.001, dur- 0) s
+377 250 M
+(.001\),) s
+377 242 M
+(                                                                doneAction: 2\),) s
+377 234 M
+(                                                pan\);) s
+377 226 M
+(                 OffsetOut.ar\(0, signal\)) s
+377 218 M
+(                }\).load\(s\)) s
+377 210 M
+(\)                       ) s
+377 194 M
+(\() s
+377 186 M
+(var time = 0, totalTime = 10, thisGrainDur, message, wait;) s
+377 170 M
+(fork{) s
+377 162 M
+(        block{| break |         ) s
+377 154 M
+(          inf.do{) s
+377 146 M
+(                message = [   \\freq, exprand\(1500, 11000\),) s
+377 138 M
+(                                       \\amp, rrand\(-18.0, -6.0\).dbamp,) s
+377 130 M
+(                                       \\dur, thisGrainDur = exprand\(0.02, 0.1\),) s
+377 122 M
+(                                       \\pan, 1.0.rand2) s
+377 114 M
+(                                     ];) s
+377 106 M
+(                                ) s
+377 98 M
+(                Synth\(\\grain, message\);) s
+377 82 M
+(                wait = thisGrainDur * rrand\(0.05, 0.5\); // divide by some number \(2, 4) s
+377 74 M
+(, 8\)) s
+377 66 M
+(                time = time + wait;) s
+377 58 M
+(                if \(time > totalTime\) { break.value };) s
+377 50 M
+(                wait.wait) s
+377 42 M
+(           }) s
+377 34 M
+(        };) s
+377 26 M
+(}) s
+377 18 M
+(\)) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_09.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_09.sc) def
+% User defined strings:
+/fmodstr (Thu Dec 15 05:53:37 2011) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(// 4\) =========  Messaging style  ==========) s
+5 450 M
+(// The Messaging style of sending OSC from the language to the server) s
+5 434 M
+(// you might have notised that the periodicity of the sound was ) s
+5 426 M
+(// a bit jittery. This is because we are sending OSC messages from ) s
+5 418 M
+(// the language to the server in real-time, not taking latency into account.) s
+5 402 M
+(// This can be better controlled with messaging style rather than the object style) s
+5 386 M
+(// Here is the object style:) s
+5 378 M
+(// \(an object you can put into variable and can be messaged\)) s
+5 370 M
+(x = Synth\(\\sineGrain, [\\freq, 500, \\dur, 0.1]\)) s
+5 354 M
+(// And the messaging style:) s
+5 346 M
+(// \(sends an OSC bundle to the server. 0.2 is the scheduled time ahead\)) s
+5 338 M
+(\() s
+5 330 M
+(s.sendBundle\(0.2,       ["/s_new", \\sineGrain, x = s.nextNodeID, 0, 1], ) s
+5 322 M
+(                                ["/n_set", x, \\freq, 400, \\dur, 0.1]) s
+5 314 M
+(                \);) s
+5 306 M
+(\)) s
+5 290 M
+(\() s
+5 282 M
+(var density, graindur, freq, amp;) s
+5 274 M
+(density = 0.05; // clouds with 50 ms intervals) s
+5 266 M
+(graindur = 0.1; // the duration of the grain is 100 ms) s
+5 258 M
+(freq = 300;) s
+5 250 M
+(amp = 0.2;) s
+5 242 M
+(Task\({) s
+5 234 M
+(   1000.do\({ ) s
+5 226 M
+(                // uncomment the object style and comment the messaging style and list) s
+5 218 M
+(en!) s
+5 210 M
+(                /*) s
+5 202 M
+(                Synth\(\\sineGrain, [     \\freq, freq,) s
+5 194 M
+(                                                        \\amp, amp,) s
+5 186 M
+(                                                        \\dur, graindur) s
+5 178 M
+(                                                ]\);) s
+5 170 M
+(                */) s
+5 162 M
+(                s.sendBundle\(0.2, ) s
+5 154 M
+(                                ["/s_new", \\sineGrain, x = s.nextNodeID, 0, 1], ) s
+5 146 M
+(                                ["/n_set", x, \\freq, freq, \\amp, amp, \\dur, graindur]) s
+5 138 M
+(                \);) s
+5 130 M
+(                ) s
+5 122 M
+(                density.wait; ) s
+5 114 M
+(        }\);) s
+5 106 M
+(}\).start;) s
+5 98 M
+(\)) s
+5 66 M
+(// There can be different envelopes in the grains. Here we use a Perc envelope:) s
+5 58 M
+(\() s
+5 50 M
+(SynthDef\(\\sineGrainWPercEnv, { arg freq = 800, amp = 0.1, dur = 0.1;) s
+5 42 M
+(        var signal;) s
+5 34 M
+(        signal = FSinOsc.ar\(freq, 0, EnvGen.kr\(Env.perc\(0.01, dur\), doneAction: 2\)*amp) s
+5 26 M
+(\);) s
+5 18 M
+(        OffsetOut.ar\(0, signal!2\); ) s
+5 10 M
+(}\).load\(s\);) s
+5 2 M
+(\)) s
+377 474 M
+(\() s
+377 466 M
+(var density, graindur, freq, amp;) s
+377 458 M
+(density = 0.01; // clouds with 10 ms intervals) s
+377 450 M
+(graindur = 0.2; // the duration of the grain is 200 ms) s
+377 442 M
+(freq = 300;) s
+377 434 M
+(amp = 0.2;) s
+377 426 M
+(Task\({) s
+377 418 M
+(   1000.do\({ ) s
+377 410 M
+(                s.sendBundle\(0.2, ) s
+377 402 M
+(                                ["/s_new", \\sineGrainWPercEnv, x = s.nextNodeID, 0, 1]) s
+377 394 M
+(, ) s
+377 386 M
+(                                ["/n_set", x, \\freq, freq, \\amp, amp, \\dur, graindur]) s
+377 378 M
+(                \);) s
+377 370 M
+(                ) s
+377 362 M
+(                density.wait; ) s
+377 354 M
+(        }\);) s
+377 346 M
+(}\).start;) s
+377 338 M
+(\)) s
+377 298 M
+(// 5\) =========  Munger  ==========) s
+377 282 M
+(// Munger is another Granular Synthesis Ugen:) s
+377 258 M
+(\() s
+377 250 M
+(SynthDef\(\\mungerGrain,{ arg out = 0, bufnum, rate=1.0, amp = 0.1, dur = 0.1, startPos=) s
+377 242 M
+(0;) s
+377 234 M
+(        var signal;) s
+377 226 M
+(        signal = ) s
+377 218 M
+(        Munger.ar\(bufnum,       //buffer numer: beware: for some reason i-rate does no) s
+377 210 M
+(t work) s
+377 202 M
+(                        BufFrames.kr\(bufnum\),) s
+377 194 M
+(                        10.0,   //rate in ms must be > 0) s
+377 186 M
+(                        10.0,   //rate variation in ms) s
+377 178 M
+(                        1000.0,         //grain lenght in ms) s
+377 170 M
+(                        20.0,   //length var) s
+377 162 M
+(                        0.25,   //speed) s
+377 154 M
+(                        0.9,    //speed var) s
+377 146 M
+(                        0.1,    //gain) s
+377 138 M
+(                        0.1,    //gain var) s
+377 130 M
+(                        1,              //direction  0: random; 1: fwd; -1: bwd;) s
+377 122 M
+(                        -1.0,   //position -1 random) s
+377 114 M
+(                        90,             //max voices) s
+377 106 M
+(                        0.5,) s
+377 98 M
+(                        0               //smoothPitch ==1: speed var continuos; ==0: d) s
+377 90 M
+(iatonic steps) s
+377 82 M
+(                        \);) s
+377 74 M
+(        Out.ar\(out, signal\)) s
+377 66 M
+(}\).load\(s\)) s
+377 58 M
+(\)) s
+377 42 M
+(Synth\(\\mungerGrain, [\\bufnum, b.bufnum]\)) s
+_R
+S
+%%Trailer
+%%Pages: 3
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

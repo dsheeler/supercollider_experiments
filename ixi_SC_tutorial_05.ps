@@ -1,0 +1,812 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:45:49 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_05.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_05.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 05 - Subtractive Synthesis Basics) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) Noise sources) s
+5 266 M
+(//      2\) Common filter types) s
+5 258 M
+(//      3\) Bell synthesis) s
+5 226 M
+(/* ) s
+5 218 M
+(The idea of subtractive synthesis is to use filters to filter out frequencies from ) s
+5 210 M
+(broadband sound sources \(rich in frequencies\). Whitenoise is the richest source as it ) s
+5 202 M
+(distributes frequencies evenly across the spectra, but it might not fit for all purpos) s
+5 194 M
+(es.) s
+5 186 M
+(*/) s
+5 162 M
+(// 1\) =========  Noise sources ==========) s
+5 146 M
+(// note that there is no frequency argument for the noise UGens.) s
+5 138 M
+(// ... noise doesn't have a frequency!!!) s
+5 130 M
+(// Check the helpfile to see what the argument stands for.) s
+5 114 M
+(// whitenoise) s
+5 106 M
+({WhiteNoise.ar\(1\)}.plot\(1\)) s
+5 98 M
+({WhiteNoise.ar\(1\)}.play) s
+5 90 M
+({WhiteNoise.ar\(1\)}.scope) s
+5 82 M
+({WhiteNoise.ar\(1\)}.freqscope) s
+5 66 M
+(// pinknoise ) s
+5 58 M
+({PinkNoise.ar\(1\)}.plot\(1\)) s
+5 50 M
+({PinkNoise.ar\(1\)}.play) s
+5 42 M
+({PinkNoise.ar\(1\)}.freqscope) s
+5 26 M
+(// brownnoise) s
+5 18 M
+({BrownNoise.ar\(1\)}.plot\(1\)) s
+5 10 M
+({BrownNoise.ar\(1\)}.play) s
+5 2 M
+({BrownNoise.ar\(1\)}.freqscope) s
+377 474 M
+(// take a look at the source file called Noise.sc \(or hit Apple+Y on WhiteNoise\)) s
+377 466 M
+(// you will find lots of interesting noise generators. For example these:) s
+377 450 M
+({ Crackle.ar\(XLine.kr\(0.99, 2, 10\), 0.4\) }.freqscope.scope;) s
+377 434 M
+({ LFDNoise0.ar\(XLine.kr\(1000, 20000, 10\), 0.1\) }.freqscope.scope;) s
+377 418 M
+({ LFClipNoise.ar\(XLine.kr\(1000, 20000, 10\), 0.1\) }.freqscope.scope;) s
+377 402 M
+(// impulse) s
+377 394 M
+({ Impulse.ar\(80, 0.7\) }.play) s
+377 386 M
+({ Impulse.ar\(4, 0.7\) }.play) s
+377 370 M
+(// dust \(random impulses\)) s
+377 362 M
+({ Dust.ar\(80\) }.play) s
+377 354 M
+({ Dust.ar\(4\) }.play) s
+377 322 M
+(// what's this?) s
+377 314 M
+({WhiteNoise.ar\(1\) * EnvGen.ar\(Env.perc\(0.001,0.5\), doneAction:2\)}.play) s
+377 298 M
+(// is this better?) s
+377 290 M
+({LPF.ar\(WhiteNoise.ar\(1\), 3300\) * EnvGen.ar\(Env.perc\(0.001,0.5\), doneAction:2\)}.play) s
+377 274 M
+(// ???) s
+377 266 M
+(\() s
+377 258 M
+(fork{) s
+377 250 M
+(        100.do\({) s
+377 242 M
+(                {LPF.ar\(WhiteNoise.ar\(1\), MouseX.kr\(200,20000, 1\)\) ) s
+377 234 M
+(                        * EnvGen.ar\(Env.perc\(0.001,0.5\), doneAction:2\)}.play;) s
+377 226 M
+(                1.wait;) s
+377 218 M
+(        }\);) s
+377 210 M
+(}) s
+377 202 M
+(\)) s
+377 170 M
+(// ???) s
+377 162 M
+(\() s
+377 154 M
+(fork{) s
+377 146 M
+(        100.do\({) s
+377 138 M
+(                {LPF.ar\(Saw.ar\(440\), MouseX.kr\(200,20000, 1\)\) ) s
+377 130 M
+(                        * EnvGen.ar\(Env.perc\(0.001,0.5\), doneAction:2\)}.play;) s
+377 122 M
+(                1.wait;) s
+377 114 M
+(        }\);) s
+377 106 M
+(}) s
+377 98 M
+(\)) s
+377 82 M
+(// ah, a whawha, ha ha!) s
+377 66 M
+({LPF.ar\(Saw.ar\(440\), 440+\(10000* SinOsc.kr\(1, 0, 0.9, 1\)\)\) }.play;) s
+377 50 M
+({LPF.ar\(WhiteNoise.ar\(0.4\), 440+\(10000* SinOsc.kr\(1.3, 0, 0.8, 1\)\)\) }.play;) s
+377 18 M
+(// 2\) ========= Common filter types ==========) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_05.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_05.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(// So let's go through the main filters:) s
+5 466 M
+(// for those of you on linux or windows machines, you could use XLine instead of Mouse) s
+5 458 M
+(X) s
+5 450 M
+(// as in : XLine.kr\(40,20000, 3\)) s
+5 434 M
+(// low pass filter) s
+5 426 M
+({LPF.ar\(WhiteNoise.ar\(0.4\), MouseX.kr\(40,20000,1\)!2\) }.play;) s
+5 410 M
+(// low pass filter with XLine) s
+5 402 M
+({LPF.ar\(WhiteNoise.ar\(0.4\), XLine.kr\(40,20000, 3, doneAction:2\)!2\) }.play;) s
+5 386 M
+(// high pass filter) s
+5 378 M
+({HPF.ar\(WhiteNoise.ar\(0.4\), MouseX.kr\(40,20000,1\)!2\) }.play;) s
+5 362 M
+(// band pass filter \(the Q is controlled by the MouseY\)) s
+5 354 M
+({BPF.ar\(WhiteNoise.ar\(0.4\), MouseX.kr\(40,20000,1\), MouseY.kr\(0.01,1\)!2\) }.play;) s
+5 338 M
+(// Mid EQ filter attenuates or boosts a frequency band) s
+5 330 M
+({MidEQ.ar\(WhiteNoise.ar\(0.024\), MouseX.kr\(40,20000,1\), MouseY.kr\(0.01,1\), 24\)!2 }.play) s
+5 322 M
+(;) s
+5 306 M
+(// what's happening here?) s
+5 298 M
+(\() s
+5 290 M
+({) s
+5 282 M
+(var signal = MidEQ.ar\(WhiteNoise.ar\(0.4\), MouseX.kr\(40,20000,1\), MouseY.kr\(0.01,1\), 24) s
+5 274 M
+(\);) s
+5 266 M
+(BPF.ar\(signal, MouseX.kr\(40,20000,1\), MouseY.kr\(0.01,1\)\) !2) s
+5 258 M
+(}.play;) s
+5 250 M
+(\)) s
+5 234 M
+(// resonant filter) s
+5 226 M
+({ Resonz.ar\(WhiteNoise.ar\(0.5\), MouseX.kr\(40,20000,1\), 0.1\)!2 }.play) s
+5 210 M
+(// a short impulse won't resonate) s
+5 202 M
+({ Resonz.ar\(Dust.ar\(0.5\), 2000, 0.1\) }.play) s
+5 186 M
+(// for that we use Ringz) s
+5 178 M
+({ Ringz.ar\(Dust.ar\(3, 0.3\), MouseX.kr\(200,6000,1\), 2\) }.play) s
+5 162 M
+(// X is frequency and Y is ring time) s
+5 154 M
+({ Ringz.ar\(Impulse.ar\(4, 0, 0.3\),  MouseX.kr\(200,6000,1\), MouseY.kr\(0.04,6,1\)\) }.play) s
+5 138 M
+(// what if we want to "resonate" many frequencies?) s
+5 122 M
+(// hmm?) s
+5 114 M
+({ Ringz.ar\(Dust.ar\(3, 0.3\), 440, 2\) + Ringz.ar\(Dust.ar\(3, 0.3\), 880, 2\) }.play) s
+5 98 M
+(// ah that's better \(using only one Dust to trigger the ring filters\):) s
+5 90 M
+(\() s
+5 82 M
+({ ) s
+5 74 M
+(var trigger, freq;) s
+5 66 M
+(trigger = Dust.ar\(3, 0.3\);) s
+5 58 M
+(freq = 440;) s
+5 50 M
+(Ringz.ar\(trigger, 440, 2, 0.3\)          + ) s
+5 42 M
+(Ringz.ar\(trigger, freq*2, 2, 0.3\)       + ) s
+5 34 M
+(Ringz.ar\(trigger, freq*3, 2, 0.3\) !2) s
+5 26 M
+(}.play) s
+5 18 M
+(\)) s
+5 2 M
+(// but there is a better way:) s
+377 474 M
+(// Klank is a bank of resonators like Ringz, but the frequency is fixed. \(there is Dyn) s
+377 466 M
+(Klank\)) s
+377 450 M
+({ Klank.ar\(`[[800, 1071, 1153, 1723], nil, [1, 1, 1, 1]], Impulse.ar\(2, 0, 0.1\)\) }.pla) s
+377 442 M
+(y;) s
+377 426 M
+(// whitenoise input) s
+377 418 M
+({ Klank.ar\(`[[440, 980, 1220, 1560], nil, [2, 2, 2, 2]], WhiteNoise.ar\(0.005\)\) }.play;) s
+377 402 M
+(// AudioIn input) s
+377 394 M
+({ Klank.ar\(`[[220, 440, 980, 1220], nil, [1, 1, 1, 1]], AudioIn.ar\([1]\)*0.001\) }.play;) s
+377 362 M
+(// Formlet is an interesting resonance filter) s
+377 354 M
+(// NOTE: we use Impulse here as it is a very short impulse \(containing all freqs\)) s
+377 346 M
+({ Formlet.ar\(Impulse.ar\(4, 0.9\), MouseX.kr\(300,2000\), 0.006, 0.1\) }.play;) s
+377 330 M
+(// or LFNoise0) s
+377 322 M
+({ Formlet.ar\(LFNoise0.ar\(4, 0.2\), MouseX.kr\(300,2000\), 0.006, 0.1\) }.play;) s
+377 290 M
+(// 3\) ========= Bell synthesis ==========) s
+377 274 M
+(// let's make a bell sound using subtractive synthesis) s
+377 266 M
+(\() s
+377 258 M
+({) s
+377 250 M
+(var chime, freqSpecs, burst, harmonics = 10;) s
+377 242 M
+(var burstEnv, burstLength = 0.001;) s
+377 226 M
+(freqSpecs = `[) s
+377 218 M
+(        {rrand\(100, 1200\)}.dup\(harmonics\), //freq array) s
+377 210 M
+(        {rrand\(0.3, 1.0\)}.dup\(harmonics\).normalizeSum, //amp array) s
+377 202 M
+(        {rrand\(2.0, 4.0\)}.dup\(harmonics\)]; //decay rate array) s
+377 186 M
+(burstEnv = Env.perc\(0, burstLength\); //envelope times) s
+377 178 M
+(burst = PinkNoise.ar\(EnvGen.kr\(burstEnv, gate: Impulse.kr\(1\)\)*0.3\); //Noise burst) s
+377 162 M
+(Klank.ar\(freqSpecs, burst\)) s
+377 154 M
+(}.play) s
+377 146 M
+(\)) s
+_R
+S
+%%Trailer
+%%Pages: 2
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

@@ -1,0 +1,1188 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:46:00 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_06.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_06.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 06 - AM, RM and FM synthesis) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) LFO \(Low Frequency Oscillators\)) s
+5 266 M
+(//      2\) Amplitude modulation \(AM\) synthesis) s
+5 258 M
+(//      3\) Ring modulation \(RM\) synthesis) s
+5 250 M
+(//      4\) Frequency modulation \(FM\) synthesis) s
+5 210 M
+(Server.default = s = Server.internal;) s
+5 202 M
+(s.boot;) s
+5 194 M
+(FreqScope.new\(300, 0\);) s
+5 162 M
+(// 1\) =========  LFO  ==========) s
+5 138 M
+(// Tremolo - variations in amplitude) s
+5 130 M
+(\() s
+5 122 M
+(// LFO \(Low Frequency Oscillator\) synthesis) s
+5 106 M
+(// mouseX is the frequency of the tremolo) s
+5 98 M
+({) s
+5 90 M
+(var modulator, carrier;) s
+5 82 M
+(modulator = SinOsc.kr\(MouseX.kr\(2,20\)\);) s
+5 74 M
+(carrier = SinOsc.ar\(333, 0, modulator\);) s
+5 66 M
+(carrier!2 // the output) s
+5 58 M
+(}.play) s
+5 50 M
+(\)) s
+5 26 M
+(// Vibrato - variation in pitch) s
+5 10 M
+(\() s
+5 2 M
+(// LFO \(Low Frequency Oscillator\) synthesis) s
+377 474 M
+(// mouseX is the power of the vibrato) s
+377 466 M
+(// mouseY is the frequency of the vibrato) s
+377 458 M
+({) s
+377 450 M
+(var modulator, carrier;) s
+377 442 M
+(modulator = SinOsc.ar\(MouseY.kr\(20, 5\), 0, MouseX.kr\(5, 20\)\); ) s
+377 434 M
+(carrier = SinOsc.ar\(440 + modulator, 0, 1\);) s
+377 426 M
+(carrier!2 // the output) s
+377 418 M
+(}.play) s
+377 410 M
+(\)) s
+377 386 M
+(// let's make a Theremin:) s
+377 370 M
+(\() s
+377 362 M
+({) s
+377 354 M
+(var freq;) s
+377 346 M
+(        freq = MouseY.kr\(4000, 200, 'exponential', 0.8\);) s
+377 338 M
+(        SinOsc.ar\(freq+\(freq*SinOsc.ar\(7,0,0.02\)\), 0, MouseX.kr\(0, 0.9\)) s
+377 330 M
+(        \)!2) s
+377 322 M
+(}.play) s
+377 314 M
+(\)) s
+377 290 M
+(        ) s
+377 282 M
+(// there are special Low Frequency Oscillators \(LFOs\)) s
+377 266 M
+(// LFSaw) s
+377 258 M
+({ SinOsc.ar\(LFSaw.kr\(4, 0, 200, 400\), 0, 0.7\) }.play) s
+377 242 M
+(// LFTri) s
+377 234 M
+({ SinOsc.ar\(LFTri.kr\(4, 0, 200, 400\), 0, 0.7\) }.play) s
+377 226 M
+({ Saw.ar\(LFTri.kr\(4, 0, 200, 400\), 0.7\) }.play) s
+377 210 M
+(// LFPar) s
+377 202 M
+({ SinOsc.ar\(LFPar.kr\(0.2, 0, 400,800\),0, 0.7\) }.play) s
+377 186 M
+(// LFCub) s
+377 178 M
+({ SinOsc.ar\(LFCub.kr\(0.2, 0, 400,800\),0, 0.7\) }.play) s
+377 162 M
+(// LFPulse) s
+377 154 M
+({ SinOsc.ar\(LFPulse.kr\(3, 1, 0.3, 200, 200\),0, 0.7\) }.play) s
+377 146 M
+({ SinOsc.ar\(LFPulse.kr\(3, 1, 0.3, 2000, 200\),0, 0.7\) }.play) s
+377 122 M
+(// LFOs can also perform at audio rate) s
+377 114 M
+({ LFPulse.ar\(LFPulse.kr\(3, 1, 0.3, 200, 200\),0, 0.7\) }.play) s
+377 106 M
+({ LFSaw.ar\(LFSaw.kr\(4, 0, 200, 400\), 0, 0.7\) }.play) s
+377 98 M
+({ LFTri.ar\(LFTri.kr\(4, 0, 200, 400\), 0, 0.7\) }.play) s
+377 90 M
+({ LFTri.ar\(LFSaw.kr\(4, 0, 200, 800\), 0, 0.7\) }.play) s
+377 50 M
+(// 2\) =========  Amplitude modulation  ==========) s
+377 26 M
+(// AM and FM synthesis are different from LFO due to the low and high sidebands) s
+377 18 M
+(// which appear when the modulation's frequency enters the audio rate \( > 20 Hz\)) s
+377 2 M
+(// In AM synthesis the modulator is unipolar \(from 0 to 1\) - so we add 1 to the wave) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_06.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_06.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(// and divide by 2 \(i.e. multiply by 0.5\)) s
+5 466 M
+(Server.default = s = Server.internal;) s
+5 458 M
+(s.boot;) s
+5 450 M
+(FreqScope.new;) s
+5 434 M
+(// AM Synthesis \(new frequencies appear below and above the main freq\)) s
+5 426 M
+(// the sidebands are the sum and the difference of the carrier and the modulator frequ) s
+5 418 M
+(ency.) s
+5 410 M
+(// \(a 300 Hz carrier and 160 Hz modulator would generate 140 Hz and 460 Hz sidebands\)) s
+5 394 M
+(\() s
+5 386 M
+({) s
+5 378 M
+(var modulator, carrier;) s
+5 370 M
+(modulator = SinOsc.ar\(MouseX.kr\(2, 20000, 1\), 0, mul:0.5, add:1\);) s
+5 362 M
+(carrier = SinOsc.ar\(MouseY.kr\(300,2000\), 0, modulator\);) s
+5 354 M
+(carrier!2 ) s
+5 346 M
+(}.play) s
+5 338 M
+(// interesting example of foldover happening in AM) s
+5 330 M
+(\)) s
+5 298 M
+(\() s
+5 290 M
+(// if there are harmonics in the wave being modulated, each of the harmonics will have) s
+5 282 M
+(// sidebands as well. - Check the sawwave.) s
+5 274 M
+({) s
+5 266 M
+(var modulator, carrier;) s
+5 258 M
+(modulator = SinOsc.ar\(MouseX.kr\(2, 2000, 1\), mul:0.5, add:1\);) s
+5 250 M
+(carrier = Saw.ar\(533, modulator\);) s
+5 242 M
+(carrier!2 // the output) s
+5 234 M
+(}.play) s
+5 218 M
+(\)) s
+5 202 M
+(// here using .abs to calculate absolute values in the modulator:) s
+5 194 M
+(// \(this results in many sidebands) s
+5 186 M
+(// try also using .cubed and other unitary operators on the signal.) s
+5 178 M
+(\() s
+5 170 M
+({) s
+5 162 M
+(var modulator, carrier;) s
+5 154 M
+(modulator = SinOsc.ar\(MouseX.kr\(2, 20000, 1\)\).abs;) s
+5 146 M
+(carrier = SinOsc.ar\(MouseY.kr\(200,2000\), 0, modulator\);) s
+5 138 M
+(carrier!2 // the output) s
+5 130 M
+(}.play) s
+5 122 M
+(\)) s
+5 82 M
+(// 3\) =========  Ring modulation  ==========) s
+5 58 M
+(// Ring Modulation uses a bipolar modulation values \(-1 to 1\) whereas) s
+5 50 M
+(// AM uses unipolar modulation values \(0 to 1\)) s
+5 34 M
+(\() s
+5 26 M
+({) s
+5 18 M
+(var modulator, carrier;) s
+5 10 M
+(modulator = SinOsc.ar\(MouseX.kr\(2, 200, 1\)\);) s
+5 2 M
+(carrier = SinOsc.ar\(333, 0, modulator\);) s
+377 482 M
+(carrier!2 // the output) s
+377 474 M
+(}.play) s
+377 458 M
+(\)) s
+377 426 M
+(// 4\) =========  FM synthesis  ==========) s
+377 410 M
+(// FM synthesis) s
+377 386 M
+({SinOsc.ar\(400 + SinOsc.ar\(MouseX.kr\(2,2000,1\), 0, MouseY.kr\(1,1000\)\), 0, 0.5\)!2}.play) s
+377 370 M
+(// the same as above - with explanations:) s
+377 362 M
+(\() s
+377 354 M
+({) s
+377 346 M
+(SinOsc.ar\(400 // the carrier and the carrier frequency) s
+377 338 M
+(        + SinOsc.ar\(MouseX.kr\(2,2000,1\), // the modulator and the modulator frequency) s
+377 330 M
+(                0,                                              // the phase of the mo) s
+377 322 M
+(dulator) s
+377 314 M
+(                MouseY.kr\(1,1000\)                       // the modulation depth \(index) s
+377 306 M
+(\)) s
+377 298 M
+(                \), ) s
+377 290 M
+(0,              // the carrier phase ) s
+377 282 M
+(0.5\)            // the carrier amplitude) s
+377 274 M
+(}.play) s
+377 258 M
+(\)) s
+377 242 M
+(// as you can see, FM synthesis is a good example of chaotic, non-linear function) s
+377 218 M
+(// for phase modulation, check out the PMOsc) s
+377 210 M
+(// phase modulation and frequency modulation is very very similar) s
+377 202 M
+( ) s
+377 194 M
+({ PMOsc.ar\(MouseX.kr\(300,900\), 600, 3, 0, 0.1\) }.play; // modulate carfreq) s
+377 178 M
+({ PMOsc.ar\(300, MouseX.kr\(300,900\), 3, 0, 0.1\) }.play; // modulate modfreq) s
+377 162 M
+({ PMOsc.ar\(300, 550, MouseX.kr\(0,20\), 0, 0.1\) }.play; // modulate index) s
+377 138 M
+(// how does the PMOsc work? Let's check the source file \(command-J or control-J\)) s
+377 122 M
+(PMOsc  {) s
+377 114 M
+(        ) s
+377 106 M
+(        *ar { arg carfreq,modfreq,pmindex=0.0,modphase=0.0,mul=1.0,add=0.0; ) s
+377 98 M
+(                ^SinOsc.ar\(carfreq, SinOsc.ar\(modfreq, modphase, pmindex\),mul,add\)) s
+377 90 M
+(        }) s
+377 82 M
+(        ) s
+377 74 M
+(        *kr { arg carfreq,modfreq,pmindex=0.0,modphase=0.0,mul=1.0,add=0.0; ) s
+377 66 M
+(                ^SinOsc.kr\(carfreq, SinOsc.kr\(modfreq, modphase, pmindex\),mul,add\)) s
+377 58 M
+(        }) s
+377 42 M
+(}) s
+377 26 M
+(/////////////////////////) s
+377 2 M
+(// note the efficiency of FM compared to Additive synthesis:) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_06.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_06.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(// FM) s
+5 466 M
+({PMOsc.ar\(1000, 1367, 12, mul: EnvGen.kr\(Env.perc\(0, 0.5\), Impulse.kr\(1\)\)\)}.play ) s
+5 458 M
+( ) s
+5 450 M
+(// compared to the Additive synthesis:) s
+5 442 M
+(\() s
+5 434 M
+({ ) s
+5 426 M
+(Mix.ar\( ) s
+5 418 M
+( SinOsc.ar\(\(1000 + \(1367 * \(-20..20\)\)\).abs,  // we're generating 41 oscillators \(see *) s
+5 410 M
+(\)) s
+5 402 M
+(  mul: 0.1*EnvGen.kr\(Env.perc\(0, 0.5\), Impulse.kr\(1\)\)\) ) s
+5 394 M
+(\)}.play ) s
+5 386 M
+(\) ) s
+5 378 M
+( ) s
+5 370 M
+(// * run this line : ) s
+5 362 M
+(\(1000 + \(1000 * \(-20..20\)\)\).abs) s
+5 354 M
+(// and see the frequency array that is mixed down with Mix.ar) s
+5 346 M
+(// \(I think this is an example from David Cope\)) s
+5 322 M
+(// Phase Modulation) s
+5 314 M
+(// note how the modulator frequency is a ratio of the carrier frequency) s
+5 306 M
+(// here that ratio is defined by MouseX ) s
+5 290 M
+(\() s
+5 282 M
+({ var freq, ratio;) s
+5 274 M
+(freq = LFNoise0.kr\(4, 20, 60\).round\(1\).midicps; ) s
+5 266 M
+(ratio = MouseX.kr\(1,4\); ) s
+5 258 M
+(SinOsc.ar\(freq,                                         // the carrier and the carrier) s
+5 250 M
+( frequency) s
+5 242 M
+(                SinOsc.ar\(freq * ratio,         // the modulator and the modulator fre) s
+5 234 M
+(quency) s
+5 226 M
+(                0,                                              // the phase of the mo) s
+5 218 M
+(dulator) s
+5 210 M
+(                MouseY.kr\(0.1,10\)                       // the modulation depth \(index) s
+5 202 M
+(\)) s
+5 194 M
+(                \), ) s
+5 186 M
+(0.5\)            // the carrier amplitude) s
+5 178 M
+(}.play) s
+5 162 M
+(\)) s
+5 146 M
+(// same patch without the comments and modulator and carrier put into variables) s
+5 138 M
+(\() s
+5 130 M
+({ var freq, ratio, modulator, carrier;) s
+5 114 M
+(freq = LFNoise0.kr\(4, 20, 60\).round\(1\).midicps; ) s
+5 106 M
+(ratio = MouseX.kr\(1,4\); ) s
+5 90 M
+(modulator = SinOsc.ar\(freq * ratio, 0, MouseY.kr\(0.1,10\)\);) s
+5 82 M
+(carrier = SinOsc.ar\(freq, modulator, 0.5\);) s
+5 66 M
+(carrier ) s
+5 58 M
+(}.play) s
+5 42 M
+(\)) s
+5 18 M
+(// Frequency Modulation) s
+5 10 M
+(// same patch as above but here the frequency is modulated, not the phase) s
+5 2 M
+(// \(minor details\)) s
+377 474 M
+(// same patch without the comments and modulator and carrier put into variables) s
+377 466 M
+(\() s
+377 458 M
+({ var freq, ratio, modulator, carrier;) s
+377 450 M
+(freq = LFNoise0.kr\(4, 20, 60\).round\(1\).midicps; ) s
+377 442 M
+(ratio = MouseX.kr\(1,4\); ) s
+377 426 M
+(modulator = SinOsc.ar\(freq * ratio, 0, MouseY.kr\(0.1,10\)\);) s
+377 418 M
+(carrier = SinOsc.ar\(freq + \(modulator * freq\), 0, 0.5\);) s
+377 402 M
+(carrier ) s
+377 394 M
+(}.play) s
+377 386 M
+(\)) s
+377 362 M
+(// let's fork it and create a perc env!) s
+377 354 M
+(\() s
+377 346 M
+({) s
+377 338 M
+(        ) s
+377 330 M
+(        40.do\({) s
+377 322 M
+(                {       var freq, ratio, modulator, carrier;) s
+377 314 M
+(                        // create an array of 12 midinotes, choose one, change it to c) s
+377 306 M
+(ps and post it:) s
+377 298 M
+(                        freq = Array.fill\(12, {arg i; 60 + i}\).choose.midicps.postln; ) s
+377 290 M
+(                        ratio = MouseX.kr\(0.5,2\); ) s
+377 282 M
+(                        ) s
+377 274 M
+(                        modulator = SinOsc.ar\(freq * ratio, 0, MouseY.kr\(0.1,10\)\);) s
+377 266 M
+(                        carrier = SinOsc.ar\(freq + \(modulator * freq\), 0, 0.5\);) s
+377 258 M
+(                        ) s
+377 250 M
+(                        carrier * EnvGen.ar\(Env.perc, doneAction:2\)) s
+377 242 M
+(                }.play;) s
+377 234 M
+(                1.wait;) s
+377 226 M
+(        }\);) s
+377 218 M
+(}.fork) s
+377 210 M
+(\)) s
+377 170 M
+(// two extra patches to play with:) s
+377 154 M
+(// Frequency Modulation) s
+377 146 M
+(\() s
+377 138 M
+(var carrier, carFreq, carAmp,   ) s
+377 130 M
+(modulator, modFreq, modAmp; ) s
+377 114 M
+(carFreq = 2000; ) s
+377 106 M
+(carAmp = 0.2;           ) s
+377 98 M
+(modFreq = 327; ) s
+377 90 M
+(modAmp = 0.2; ) s
+377 74 M
+({) s
+377 66 M
+(        modAmp = MouseX.kr\(0, 1\);               // choose normalized range for modulat) s
+377 58 M
+(ion) s
+377 50 M
+(        modFreq = MouseY.kr\(1000, 10, 'exponential'\);) s
+377 42 M
+(        modulator = SinOsc.ar\( modFreq, 0, modAmp\);                     ) s
+377 34 M
+(        carrier = SinOsc.ar\( carFreq + \(modulator * carFreq\), 0, carAmp\);) s
+377 26 M
+(        ) s
+377 18 M
+(        [ carrier, carrier, modulator ] // on OSX, you can .scope it and see 3 separat) s
+377 10 M
+(e channels) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 4 def
+/fname (ixi_SC_tutorial_06.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_06.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (4) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 482 M
+(}.play) s
+5 474 M
+(\)) s
+5 458 M
+(// Phase Modulation) s
+5 450 M
+(\() s
+5 442 M
+(var carrier, carFreq, carAmp,           // variables for a carrier) s
+5 434 M
+(modulator, modFreq, modAmp;             // and a modulator oscillator.) s
+5 418 M
+(carFreq = 200;                  // initial parameters for both.) s
+5 410 M
+(carAmp = 0.2;                           // \(needed if you decide to turn mouse control) s
+5 402 M
+( off.\)) s
+5 394 M
+(modFreq = 327; ) s
+5 386 M
+(modAmp = 0.2; ) s
+5 370 M
+({ ) s
+5 362 M
+(        modAmp = MouseX.kr\(0, 7\); ) s
+5 354 M
+(        modFreq = MouseY.kr\(1000, 10, 'exponential'\);) s
+5 346 M
+(        modulator = SinOsc.ar\(          // modulator is a Sine oscillator) s
+5 338 M
+(                modFreq,                                        ) s
+5 330 M
+(                0, ) s
+5 322 M
+(                modAmp\);                        ) s
+5 306 M
+(        carrier = SinOsc.ar\() s
+5 298 M
+(                carFreq, ) s
+5 290 M
+(                modulator,                      // modulate the phase input of the Sin) s
+5 282 M
+(Osc.) s
+5 274 M
+(                carAmp\);) s
+5 266 M
+(        [ carrier, carrier, modulator * 0.2 ] ) s
+5 258 M
+(}.play) s
+5 250 M
+(\)) s
+5 218 M
+(// And finally we make a synthDef with FM synthesis, something that we) s
+5 210 M
+(// can play from a say MIDI keyboard or tune with knobs and sliders:) s
+5 186 M
+(\( ) s
+5 178 M
+(SynthDef\(\\fmsynth, {arg outbus = 0, freq=440, carPartial=1, modPartial=1, index=3, mul) s
+5 170 M
+(=0.2, ts=1;) s
+5 162 M
+(        var mod, car, env;) s
+5 154 M
+(        // modulator frequency) s
+5 146 M
+(        mod = SinOsc.ar\(freq * modPartial, 0, freq * index \);) s
+5 138 M
+(        // carrier frequency) s
+5 130 M
+(        car = SinOsc.ar\(\(freq * carPartial\) + mod, 0, mul \);) s
+5 122 M
+(        // envelope) s
+5 114 M
+(        env = EnvGen.ar\( Env.perc\(0.01, 1\), doneAction: 2, timeScale: ts\);) s
+5 106 M
+(        Out.ar\( outbus, car * env\)) s
+5 98 M
+(}\).load\(s\);) s
+5 90 M
+(\)) s
+5 66 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\ts, 1]\);) s
+5 58 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 2.5, \\ts, 2]\);) s
+5 50 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 3.5, \\ts, 2]\);) s
+5 42 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 4.0, \\ts, 2]\);) s
+5 34 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 300.0, \\carPartial, 1.5, \\ts, 2]\);) s
+5 26 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 0.5, \\ts, 2]\);) s
+5 10 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\modPartial, 1, \\ts, 2]\)) s
+5 2 M
+(;) s
+377 482 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 300.0, \\carPartial, 1.5, \\modPartial, 1, \\ts, 2]\)) s
+377 474 M
+(;) s
+377 466 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 400.0, \\carPartial, 1.5, \\modPartial, 1, \\ts, 2]\)) s
+377 458 M
+(;) s
+377 450 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 800.0, \\carPartial, 1.5, \\modPartial, 1, \\ts, 2]\)) s
+377 442 M
+(;) s
+377 426 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\modPartial, 1, \\ts, 2]\)) s
+377 418 M
+(;) s
+377 410 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\modPartial, 1.1, \\ts, 2) s
+377 402 M
+(]\);) s
+377 394 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\modPartial, 1.15, \\ts, ) s
+377 386 M
+(2]\);) s
+377 378 M
+(Synth\(\\fmsynth, [ \\outbus, 0, \\freq, 600.0, \\carPartial, 1.5, \\modPartial, 1.2, \\ts, 2) s
+377 370 M
+(]\);) s
+_R
+S
+%%Trailer
+%%Pages: 4
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

@@ -1,0 +1,986 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Enscript Output
+%%For: Daniel Sheeler
+%%Creator: GNU Enscript 1.6.5.2
+%%CreationDate: Thu Dec 15 11:46:11 2011
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6.5 2
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6.5 2
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6.5 2
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      fname length fmodstr length add pagenumstr length add 95 6 idiv add d_header_w 6 idiv le{
+        5 0 moveto fname show
+        45 0 rmoveto fmodstr show
+        45 0 rmoveto pagenumstr show
+      } {
+        5 0 moveto fmodstr show
+        45 0 rmoveto pagenumstr show
+        fname length d_header_w 6 idiv idiv 1 add 10 mul 5 exch moveto
+        1 1 fname length d_header_w 6 idiv idiv
+        {
+          dup fname exch 1 sub d_header_w 6 idiv mul d_header_w 6 idiv getinterval show
+          5 exch 10 mul fname length d_header_w 6 idiv idiv 1 add 10 mul exch sub moveto
+        } for
+        5 10 moveto
+        fname fname length d_header_w 6 idiv idiv d_header_w 6 idiv mul dup fname length exch sub getinterval show
+      }ifelse
+    }ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 536 def
+/d_header_x 0 def
+/d_header_y 492 def
+/d_header_w 744 def
+/d_header_h 44 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 492 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 1 def
+/fname (ixi_SC_tutorial_08.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_08.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 466 M
+(// =====================================================================) s
+5 458 M
+(// - SuperCollider Basics -) s
+5 450 M
+(// =====================================================================) s
+5 434 M
+(// Tutorial 08 - Buffers and Samples) s
+5 418 M
+(// =====================================================================) s
+5 410 M
+(// - ixi audio tutorial - www.ixi-audio.net) s
+5 402 M
+(// =====================================================================) s
+5 378 M
+(/*              ) s
+5 370 M
+(                ---------------------------------------------------------------) s
+5 362 M
+(                Copyright \(c\) 2005-2008, ixi audio.) s
+5 354 M
+(                This work is licensed under a Creative Commons ) s
+5 346 M
+(                Attribution-NonCommercial-ShareAlike 2.0 England & Wales License.) s
+5 338 M
+(                http://creativecommons.org/licenses/by-nc-sa/2.0/uk/) s
+5 330 M
+(                ---------------------------------------------------------------) s
+5 322 M
+(*/) s
+5 290 M
+(// ========== Contents of this tutorial ==========) s
+5 274 M
+(//      1\) Allocating a buffer) s
+5 266 M
+(//      2\) Reading a buffer) s
+5 258 M
+(//      3\) Streaming a buffer) s
+5 250 M
+(//      4\) Record into buffer) s
+5 242 M
+(//      5\) Fill a buffer) s
+5 234 M
+(//      6\) Pitch and Time changes in playback) s
+5 226 M
+(//      7\) Using BufWr and BufRd) s
+5 170 M
+(// 1\) =========  Allocating a buffer  ==========) s
+5 154 M
+(/* ) s
+5 146 M
+(A buffer is a globally available array of floating point numbers stored) s
+5 138 M
+(on the server. It can hold all kinds of data, most typically sampled audio.) s
+5 130 M
+(*/) s
+5 114 M
+(// we create a buffer: \(server, frames, number of channels\)) s
+5 106 M
+(// \(allocating space on the server for the information to enter the buffer\)) s
+5 98 M
+(b = Buffer.alloc\(s, 44100 * 8.0, 2\); // 4 seconds of sound on a 44100 Hz system, 2 cha) s
+5 90 M
+(nnels) s
+5 74 M
+(// in the post window we get this information:) s
+5 66 M
+(//  - > Buffer\(10, 352800, 2, 44100, nil\) // bufnum, samples, channels, sample-rate, p) s
+5 58 M
+(ath) s
+5 42 M
+(b = Buffer.alloc\(s, 44100 * 8.0, 4\); // 2 seconds of sound on a 44100 Hz system, 4 cha) s
+5 34 M
+(nnels) s
+5 18 M
+(// and we can get to this information by calling the server:) s
+5 10 M
+(b.bufnum.postln;) s
+377 482 M
+(// we can check the number of frames \(samples\)) s
+377 474 M
+(b.numFrames.postln;) s
+377 458 M
+(// and the number of channels) s
+377 450 M
+(b.numChannels.postln;) s
+377 434 M
+(//which means that the following should give us the length of the sample in seconds:) s
+377 426 M
+(\(b.numFrames / b.numChannels \) / 44100) s
+377 410 M
+(// to free the buffer from the server:) s
+377 402 M
+(b.free;) s
+377 386 M
+(// Buffers are loaded into RAM, so it depends on your system how many you can load.) s
+377 370 M
+(// open the terminal, type top, run the server and then run this line.) s
+377 362 M
+(a = Array.fill\(10, {Buffer.alloc\(s,44100 * 8.0, 2\)}\);) s
+377 346 M
+(// you see how the memory of scsynth increases) s
+377 330 M
+(// now, run the following line and the memory is de-allocated.) s
+377 322 M
+(10.do\({arg i; a[i].free;}\)) s
+377 306 M
+(// or simply) s
+377 298 M
+(a.collect\(_.free;\)) s
+377 282 M
+(///////////// sidestep.... try this:) s
+377 274 M
+(a = [1,2,3,4,5,6];) s
+377 266 M
+(b = a.collect\(_ + 100\);) s
+377 258 M
+(\("a is : "+a\).postln;) s
+377 250 M
+(\("b is : "+b\).postln;) s
+377 242 M
+(//////////////////////) s
+377 202 M
+(// 2\) =========  Reading a buffer  ==========) s
+377 186 M
+(b = Buffer.read\(s, "sounds/a11wlk01.wav"\);) s
+377 178 M
+(b.bufnum.postln; // let's check its bufnum) s
+377 162 M
+(// now play it) s
+377 154 M
+(\() s
+377 146 M
+(SynthDef\(\\playBuf,{ arg out = 0, bufnum;) s
+377 138 M
+(        var signal;) s
+377 130 M
+(        signal = PlayBuf.ar\(1, bufnum, BufRateScale.kr\(bufnum\)\);) s
+377 122 M
+(        Out.ar\(out, signal ! 2\)) s
+377 114 M
+(}\).load\(s\)) s
+377 106 M
+(\)) s
+377 98 M
+(x = Synth\(\\playBuf, [\\bufnum, b.bufnum]\) // we pass in the number of the buffer) s
+377 82 M
+(x.free; // free the synth ) s
+377 74 M
+(b.free; // free the buffer) s
+377 66 M
+(                ) s
+377 58 M
+(// for many buffers, the typical thing to do is to load them into an array:) s
+377 50 M
+(b = Array.fill\(10, {Buffer.read\(s, "sounds/a11wlk01.wav"\)}\);) s
+377 34 M
+(// and then we can access it from the index in the array) s
+377 26 M
+(x = Synth\(\\playBuf, [\\bufnum, b[2].bufnum]\)) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 2 def
+/fname (ixi_SC_tutorial_08.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_08.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 474 M
+(// 3\) =========  Streaming a buffer  ==========) s
+5 450 M
+(// To use longer files \(say you want to create a sequencer like Logic\)) s
+5 442 M
+(// it is better to use DiskIn \(which reads the file from disk, ie. not loaded into RAM) s
+5 434 M
+(\)) s
+5 418 M
+(// Then we still need a buffer \(but we are cueing it, i.e. not filling\)) s
+5 410 M
+(b = Buffer.cueSoundFile\(s, "sounds/a11wlk01-44_1.aiff", 0, 1\);) s
+5 394 M
+(\() s
+5 386 M
+(SynthDef\(\\playcuedBuf,{ arg out = 0, bufnum;) s
+5 378 M
+(        var signal;) s
+5 370 M
+(        signal = DiskIn.ar\(1, bufnum\);) s
+5 362 M
+(        Out.ar\(out, signal ! 2\)) s
+5 354 M
+(}\).load\(s\)) s
+5 346 M
+(\)) s
+5 330 M
+(x = Synth\(\\playcuedBuf, [\\bufnum, b.bufnum], s\)) s
+5 314 M
+(// NOTE: As of July 2007, you can also just pass the buffer and) s
+5 306 M
+(// not the bufnum to the DiskIn or the PlayBuf. ) s
+5 298 M
+(// See: http://www.create.ucsb.edu/pipermail/sc-users/2007-July/035622.html) s
+5 258 M
+(// 4\) =========  Recording into a buffer  ==========) s
+5 242 M
+(b = Buffer.alloc\(s, 44100 * 8.0, 1\); // 8 second mono buffer) s
+5 226 M
+(\() s
+5 218 M
+(SynthDef\(\\recBuf,{ arg out=0, bufnum=0;) s
+5 210 M
+(        var in;) s
+5 202 M
+(        in = AudioIn.ar\(1\);) s
+5 194 M
+(        RecordBuf.ar\(in, bufnum\);) s
+5 186 M
+(}\).load\(s\);) s
+5 178 M
+(\)) s
+5 162 M
+(// we record into the buffer) s
+5 154 M
+(x = Synth\(\\recBuf, [\\out, 0, \\bufnum, b.bufnum]\);) s
+5 146 M
+(x.free;) s
+5 130 M
+(// and we can play it back using the playBuf synthdef we created above) s
+5 122 M
+(z = Synth\(\\playBuf, [\\bufnum, b.bufnum]\)) s
+5 114 M
+(z.free;) s
+5 98 M
+(// if we like it, we can write it to disk as a soundfile:) s
+5 90 M
+(b.write\("myBufRecording.aif", "AIFF", 'int16'\);) s
+5 74 M
+(// TIP: play with the recLevel and preLevel of a buffer) s
+5 66 M
+(// to overdub into the buffer, creating layers of sound.) s
+5 58 M
+(// or perhaps "I'm Sitting in a Room" exercise a la Lucier.) s
+5 18 M
+(// 5\) =========  Fill a buffer  ==========) s
+5 2 M
+(// The Osc UGen is a wavetable look-up oscillator) s
+377 482 M
+(\() s
+377 474 M
+(SynthDef\(\\oscplayer,{ arg out = 0, bufnum;) s
+377 466 M
+(        var signal;) s
+377 458 M
+(        signal = Osc.ar\(bufnum, MouseX.kr\(60,300\)\); // mouse x to control pitch) s
+377 450 M
+(        Out.ar\(out, signal ! 2\)) s
+377 442 M
+(}\).load\(s\)) s
+377 434 M
+(\)) s
+377 410 M
+(b = Buffer.alloc\(s, 512, 1\); // we allocate 512 samples \(the buffer size must be the p) s
+377 402 M
+(ower of 2\)) s
+377 394 M
+(b.sine1\(1.0/[1,2,3,4], true, true, true\);) s
+377 386 M
+(b.plot // notise somthing strange?) s
+377 370 M
+(// check this:) s
+377 362 M
+(\() s
+377 354 M
+(b.getToFloatArray\(action: { |array| \312{ array[0, 2..].plot }.defer }\);) s
+377 346 M
+(\)) s
+377 330 M
+(// let's listen to it) s
+377 322 M
+(a = Synth\(\\oscplayer, [\\bufnum, b.bufnum]\)) s
+377 314 M
+(a.free;) s
+377 290 M
+(// a saw wave:) s
+377 274 M
+(b = Buffer.alloc\(s, 512, 1\);) s
+377 266 M
+(b.sine1\(1.0/Array.series\(90,1,1\)*2, false, true, true\);) s
+377 258 M
+(b.getToFloatArray\(action: { |array| \312{ array[0, 2..].plot }.defer }\);) s
+377 242 M
+(// play it) s
+377 234 M
+(a = Synth\(\\oscplayer, [\\bufnum, b.bufnum]\)) s
+377 226 M
+(a.free;) s
+377 202 M
+(// fill it with random numbers) s
+377 194 M
+(b = Buffer.alloc\(s, 512, 1\);) s
+377 186 M
+(b.sine1\(Array.fill\(50, {1.0.rand}\), true, true, true\);) s
+377 178 M
+(b.getToFloatArray\(action: { |array| \312{ array[0, 2..].plot }.defer }\);) s
+377 154 M
+(// let's listen to it) s
+377 146 M
+(a = Synth\(\\oscplayer, [\\bufnum, b.bufnum]\)) s
+377 138 M
+(a.free;) s
+377 106 M
+(// use an envelope to fill a buffer) s
+377 98 M
+(a = Env\([0, 1, 0.2, 0.3, -1, 0.3, 0], [0.1, 0.1, 0.1, 0.1, 0.1, 0.1], \\sin\).plot;) s
+377 82 M
+(// ENVELOPE turned into a SIGNAL and then into a WAVETABLE) s
+377 74 M
+(c = a.asSignal\(512\).asWavetable;) s
+377 66 M
+(c.size; // the size of the wavetable is twice the size of the signal... 1024) s
+377 50 M
+(// now we neet to put this wavetable into a buffer:) s
+377 42 M
+(b = Buffer.alloc\(s, 512\);) s
+377 34 M
+(b.setn\(0, c\);) s
+377 18 M
+(// play it) s
+377 10 M
+(a = Synth\(\\oscplayer, [\\bufnum, b.bufnum]\)) s
+377 2 M
+(a.free;) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -574 translate
+/pagenum 3 def
+/fname (ixi_SC_tutorial_08.sc) def
+/fdir (.) def
+/ftail (ixi_SC_tutorial_08.sc) def
+% User defined strings:
+/fmodstr (Sun Mar 09 08:06:25 2008) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 458 M
+(// and for the sake of exhaustibility, check out Signal as well:) s
+5 442 M
+(x = Signal.sineFill\(512, [0,0,0,1]\);) s
+5 434 M
+([x, x.neg, x.abs, x.sign, x.squared, x.cubed, ) s
+5 426 M
+(x.asin.normalize, x.exp.normalize, x.distort].flop.flat.plot\(numChannels: 9\);) s
+5 410 M
+(c = x.exp.normalize.asWavetable; // try the other unary operators on the signal) s
+5 394 M
+(b = Buffer.alloc\(s, 512\);) s
+5 386 M
+(b.setn\(0, c\); // put the wavetable into the buffer so Osc can read it.) s
+5 370 M
+(// play it) s
+5 362 M
+(a = Synth\(\\oscplayer, [\\bufnum, b.bufnum]\)) s
+5 354 M
+(a.free;) s
+5 322 M
+(// 6\) =========  Pitch and time changes  ==========) s
+5 298 M
+(b = Buffer.read\(s, "sounds/a11wlk01-44_1.aiff"\);) s
+5 282 M
+(// The most common way) s
+5 274 M
+(// here double rate \(and pitch\) results in half the length \(time\) of the file) s
+5 258 M
+(\() s
+5 250 M
+(SynthDef\(\\playBuf,{ arg out = 0, bufnum;) s
+5 242 M
+(        var signal;) s
+5 234 M
+(        signal = PlayBuf.ar\(1, bufnum, MouseX.kr\(0.2, 4\), loop:1\);) s
+5 226 M
+(        Out.ar\(out, signal ! 2\)) s
+5 218 M
+(}\).load\(s\)) s
+5 210 M
+(\)) s
+5 194 M
+(x = Synth\(\\playBuf, [\\bufnum, b.bufnum]\)) s
+5 186 M
+(x.free) s
+5 162 M
+(// we could use PitchShift to change the pitch without changing the time) s
+5 154 M
+(// PitchShift is a granular synthesis pitch shifter \(other techniques include Phase Vo) s
+5 146 M
+(coders\)) s
+5 130 M
+(\() s
+5 122 M
+(SynthDef\(\\playBufWPitchShift,{ arg out = 0, bufnum;) s
+5 114 M
+(        var signal;) s
+5 106 M
+(        signal = PlayBuf.ar\(1, bufnum, 1, loop:1\);) s
+5 98 M
+(        signal = PitchShift.ar\() s
+5 90 M
+(                signal, // stereo audio input) s
+5 82 M
+(                0.1,                    // grain size) s
+5 74 M
+(                MouseX.kr\(0,2\), // mouse x controls pitch shift ratio) s
+5 66 M
+(                0,                              // pitch dispersion) s
+5 58 M
+(                0.004                   // time dispersion) s
+5 50 M
+(        \);) s
+5 42 M
+(        Out.ar\(out, signal ! 2\)) s
+5 34 M
+(}\).load\(s\)) s
+5 26 M
+(\)) s
+5 10 M
+(x = Synth\(\\playBufWPitchShift, [\\bufnum, b.bufnum]\)) s
+5 2 M
+(x.free) s
+377 466 M
+(// for time streching check out the Warp0, Warp1 Ugens.) s
+377 426 M
+(// 7\) =========  BufRd and BufWr  ==========) s
+377 410 M
+(// Here we use BufRd \(Buffer Read\) to play the contents of a buffer at a given index) s
+377 402 M
+(// We use Phasor as index to move between the start and the end of the buffer.) s
+377 386 M
+({ BufRd.ar\(1, b.bufnum, Phasor.ar\(0, 1, 0, BufFrames.kr\(b\)\)\) }.play;) s
+377 370 M
+(// use SinOsc to modulate the playrate) s
+377 362 M
+({ BufRd.ar\(1, b.bufnum, Phasor.ar\(0, SinOsc.ar\(1\).range\(0.5, 1.5\), 0, BufFrames.kr\(b\)\)) s
+377 354 M
+(\) }.play;) s
+377 338 M
+(// Write into buffer:) s
+377 330 M
+(\() s
+377 322 M
+(y = { arg rate=1; ) s
+377 314 M
+(        var signal;) s
+377 306 M
+(        signal = SinOsc.ar\(LFNoise1.kr\(2, 300, 400\), 0, 0.1\);) s
+377 298 M
+(        BufWr.ar\(signal, b.bufnum, Phasor.ar\(0, BufRateScale.kr\(0\) * rate, 0, BufFrame) s
+377 290 M
+(s.kr\(0\)\)\);) s
+377 282 M
+(        0.0 //quiet) s
+377 274 M
+(}.play;) s
+377 266 M
+(\)) s
+377 250 M
+(// play it back) s
+377 242 M
+({ BufRd.ar\(1, b.bufnum, Phasor.ar\(0, 1, 0, BufFrames.kr\(b.bufnum\)\)\) }.play;) s
+377 226 M
+(y.free;) s
+377 194 M
+(// Scratching the buffer with the mouse) s
+377 178 M
+(b = Buffer.read\(s, "sounds/a11wlk01.wav"\);) s
+377 162 M
+(SynthDef\(\\xiiscratch, {arg bufnum, pitch=1, start=0, end;) s
+377 154 M
+(        var signal;) s
+377 146 M
+(        signal = BufRd.ar\(1, bufnum, Lag.ar\(K2A.ar\(MouseX.kr\(1, end\)\), 0.4\)\);) s
+377 138 M
+(        Out.ar\(0, signal!2\);) s
+377 130 M
+(}\).play\(s, [\\bufnum, b.bufnum, \\end, b.numFrames]\);) s
+377 114 M
+(        ) s
+_R
+S
+%%Trailer
+%%Pages: 3
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF
