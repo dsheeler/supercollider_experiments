@@ -1,0 +1,119 @@
+// =====================================================================
+// SuperCollider Workspace
+// =====================================================================
+
+s.boot;
+s.quit;
+40.0, 40.0, 40.0, 50.0, 66.667, 75.0, 100.0, 114.0, 133.333,
+		150.0, 177.777, 200.0, 228.0, 40. 0
+(
+SynthDef("FM", { arg dur=0.15, fc=200, fm=280, amp=0.2, imax=10, gate=1; 
+	var osc, ampenv, modenv, ampenv_woodDrum, modenv_woodDrum;
+	5.postln;
+	modenv_woodDrum = Env.new([0.8,0.9,1.0,0.9,0],[0.05, 0.05, 0.05, 0.85], [2, -4, 4, -5]);
+	ampenv_woodDrum = Env.new([1,0,0], [0.1, 0.9], 'linear');
+	ampenv = modenv = Env.new([0,1,0.8,0.8, 0], [0.1,0.1, 0.7, 0.1]);
+	ampenv.plot;
+	modenv.plot;
+	osc = SinOsc.ar(fc + SinOsc.ar(fm, 0, fm * imax * EnvGen.ar(modenv,gate,timeScale: dur, doneAction: 2)), 0, amp * EnvGen.ar(ampenv,gate,timeScale: dur));
+		//	osc = SinOsc.ar(fc, 0, 0.5);
+	Out.ar(0, osc) 
+}).writeDefFile;
+Server.local.sendMsg("/d_load", SynthDef.synthDefDir ++ "FM.scsyndef");
+)
+
+
+a = Synth("FM");
+a.play(s);
+
+a.set(\gate, 1);
+a.set(\fc, 400);
+a.set(\gate, 0);
+a.free;
+
+(
+var w, f, d, values, server, id, isOn = false, msg;
+var b1, b2, s;
+
+values = IdentityDictionary.new;
+server = Server.local;
+
+f = { arg name, spec = \lin, guispec;
+	var height = 20, v, s, n;
+	guispec = guispec ? spec;
+	spec = spec.asSpec;
+	guispec = guispec.asSpec;
+	spec.class.postln;
+	v = GUI.staticText.new(w, Rect(0, 0, 72, height));
+	v.font = GUI.font.new("Helvetica", 12);
+	v.stringColor = Color.black;
+	v.align = \right;
+	
+	s = GUI.slider.new(w, Rect(0, 0, 182, height));
+	s.resize = 2;
+	s.action = { 
+		var val, guival, step;
+		val = spec.map(s.value);
+		values.put(name, val);
+		//		server.sendMsg("/n_set", id, name, val);
+		guival = guispec.map(s.value);
+		step = pow(10, floor(min(0, guival.abs.log10 - 2)));
+		v.string = guival.round(step).asString ++ guispec.units;
+	};
+	s.value = spec.unmap(spec.default);
+	s.action.value;
+	
+	n = GUI.staticText.new(w, Rect(0, 0, 72, height));	n.string = name;
+	n.stringColor = Color.black;
+	n.font = GUI.font.new("Helvetica", 12);
+	n.resize = 3;
+	
+	w.view.decorator.nextLine;
+};
+
+
+w = GUI.window.new("FM", Rect(512, 64, 360, 130));
+w.view.decorator = d = FlowLayout(w.view.bounds);
+
+server.sendMsg("/d_load", "synthdefs/FM.scsyndef");
+
+
+
+b2 = GUI.button.new(w, Rect(0,0, 80, 24));
+b2.states = [ ["Play", Color.black, Color.green] ];
+b2.action = { arg view; 
+	var id = server.nextNodeID;
+	msg = ["/s_new", "FM", id, 0, 0];
+	values.keysValuesDo({ arg key, value; 
+		msg = msg.addAll([key, value]); 
+	});
+	msg.postln;
+	server.performList(\sendMsg, msg); 
+
+};
+
+b2.enabled = server.serverRunning;
+d.nextLine;
+
+f.value(\dur,[0, 50, \lin]);
+f.value(\fc, [20, 500, \lin]);
+f.value(\fm, [0,500, \lin]);
+f.value(\amp, \amp, \db);
+f.value(\imax,  [0,500,\lin]);
+
+a = SimpleController(server);
+f = { arg server; 
+	b2.enabled = server.serverRunning;
+	if (server.serverRunning.not, { b2.value = 0 });
+};
+a.put(\serverRunning, f);
+w.onClose = { 
+ 	a.remove;
+};
+
+w.front;
+)
+////////////////////////////////////////////////////////////////////////
+
+a = Synth("FM");
+a.free;o

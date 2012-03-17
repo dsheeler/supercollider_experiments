@@ -43,17 +43,15 @@ frequency, phase and amplitude envelopes, we can simulate any sound.
 // making complex sounds out of sinusoidals
 
 Server.default = s = Server.internal.boot;
-s.quit;
+
 // create a new analyzer
 FreqScope.new(500, 300);
 
 
 // so what's additive synthesis?
 // adding waves together:
-f = {SinOsc.ar(440,0, 0.4) + SinOsc.ar(880, 0, 0.4)!2}
-f.play;
-f.stop;
-f.
+{SinOsc.ar(440,0, 0.4) + SinOsc.ar(880, 0, 0.4)!2}.play
+
 // etc:
 
 (
@@ -122,7 +120,6 @@ f = {
 f.plot;
 f.play;
 f.pause;
-f.free;
 // Inverse saw wave
 
 (

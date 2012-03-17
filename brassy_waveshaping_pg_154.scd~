@@ -1,0 +1,130 @@
+// =====================================================================
+// SuperCollider Workspace
+// =====================================================================
+
+s.boot;
+s.quit;
+
+(
+SynthDef("brassy_waveshaping_pg_154", { arg freq=440, gate; 
+	var osc, ampenv, ampenvctl, tfuncenv, buf, tfuncstream, f1, f1envctl;
+
+	buf = Buffer.alloc(s,1024,1);
+
+	t = Signal.fill(512, {arg x; var y; y = ((x -255)/ 256.0); ((20.48 * (y**11)) - (43.52 * (y**9)) + (12.8 * (y**8)) + (40.32 * (y**7)) - (16*(y**6)) - (17.44*(y**5)) + (7.2*(y**4)) + (3.6*(y**3)) - (1.8*(y**2)) - (1.27*y) - (0.3)); (y**2).postln;});
+
+	buf.loadCollection(t.asWavetable);
+
+	f1 = Env.newClear(10);
+	ampenv = Env.newClear(10);
+	ampenvctl = Control.names([\ampenv]).kr(ampenv.asArray);
+	f1envctl = Control.names([\f1]).kr( f1.asArray );
+
+	//	osc = EnvGen.kr(f1envctl,gate, timeScale: 100)*Shaper.ar(buf, SinOsc.ar(freq, 0, EnvGen.kr(ampenvctl, gate, timeScale: 100)));
+	osc = Shaper.ar(buf, SinOsc.ar(freq, 0, 0.5EnvGen.kr(ampenvctl, gate, doneAction: 0)));
+	Out.ar(0, osc) 
+}).writeDefFile;
+Server.local.sendMsg("/d_load", SynthDef.synthDefDir ++ "brassy_waveshaping_pg_154.scsyndef");
+)
+
+e = Env.adsr(0.04,0.03, 0.7,0.15, 1.0, 'lin');
+e.test(2).plot;
+
+var  f1, dur = 2;
+f = Env.new([0, 0.49, 0.5, 0.7, 0.7, 1], [0.001, 0.039, 0.3,2-0.15-0.07, 0.15]);
+
+
+a = Synth("brassy_waveshaping_pg_154");
+a.setn(\f1, f.asArray);
+a.setn(\ampenv, e.asArray);
+
+a.setn(\gate, 1);
+a.setn(\gate, -1);
+a.free;
+
+(
+var w, f, d, values, server, id, isOn = false, msg;
+var b1, b2, s;
+
+values = IdentityDictionary.new;
+server = Server.local;
+
+f = { arg name, spec = \lin, guispec;
+	var height = 20, v, s, n;
+	guispec = guispec ? spec;
+	spec = spec.asSpec;
+	guispec = guispec.asSpec;
+	spec.class.postln;
+	v = GUI.staticText.new(w, Rect(0, 0, 72, height));
+	v.font = GUI.font.new("Helvetica", 12);
+	v.stringColor = Color.black;
+	v.align = \right;
+	
+	s = GUI.slider.new(w, Rect(0, 0, 182, height));
+	s.resize = 2;
+	s.action = { 
+		var val, guival, step;
+		val = spec.map(s.value);
+		values.put(name, val);
+		//		server.sendMsg("/n_set", id, name, val);
+		guival = guispec.map(s.value);
+		step = pow(10, floor(min(0, guival.abs.log10 - 2)));
+		v.string = guival.round(step).asString ++ guispec.units;
+	};
+	s.value = spec.unmap(spec.default);
+	s.action.value;
+	
+	n = GUI.staticText.new(w, Rect(0, 0, 72, height));	n.string = name;
+	n.stringColor = Color.black;
+	n.font = GUI.font.new("Helvetica", 12);
+	n.resize = 3;
+	
+	w.view.decorator.nextLine;
+};
+
+
+w = GUI.window.new("FM", Rect(512, 64, 360, 130));
+w.view.decorator = d = FlowLayout(w.view.bounds);
+
+server.sendMsg("/d_load", "synthdefs/FM.scsyndef");
+
+
+
+b2 = GUI.button.new(w, Rect(0,0, 80, 24));
+b2.states = [ ["Play", Color.black, Color.green] ];
+b2.action = { arg view; 
+	var id = server.nextNodeID;
+	msg = ["/s_new", "FM", id, 0, 0];
+	values.keysValuesDo({ arg key, value; 
+		msg = msg.addAll([key, value]); 
+	});
+	msg.postln;
+	server.performList(\sendMsg, msg); 
+
+};
+
+b2.enabled = server.serverRunning;
+d.nextLine;
+
+f.value(\dur,[0, 50, \lin]);
+f.value(\fc, [20, 500, \lin]);
+f.value(\fm, [0,500, \lin]);
+f.value(\amp, \amp, \db);
+f.value(\imax,  [0,500,\lin]);
+
+a = SimpleController(server);
+f = { arg server; 
+	b2.enabled = server.serverRunning;
+	if (server.serverRunning.not, { b2.value = 0 });
+};
+a.put(\serverRunning, f);
+w.onClose = { 
+ 	a.remove;
+};
+
+w.front;
+)
+////////////////////////////////////////////////////////////////////////
+
+a = Synth("FM");
+a.free;o
