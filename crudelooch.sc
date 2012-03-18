@@ -25,7 +25,7 @@ SynthDef(\grains, {arg freq, amp, grain_dur, dur=1, grain_freq=2, gate=1;
 
 SynthDef(\up_whistle, {arg freqlo, freqhi, dur=0.1, amp=0.5;
 	var signal, env;
-	env = EnvGen.ar(Env.linen(0.1, dur, 0.1, amp)); 
+	env = EnvGen.ar(Env.linen(0.1, dur, 0.1, amp), doneAction:2); 
 
 	signal = SinOsc.ar(XLine.ar(freqlo,freqhi, dur)) * env;
 	Out.ar(0, signal ! 2);
@@ -33,9 +33,9 @@ SynthDef(\up_whistle, {arg freqlo, freqhi, dur=0.1, amp=0.5;
 
 SynthDef(\up_trill, {arg freqlo, freqhi, dur=0.1, amp=0.5;
 	var signal, env, envEnv1, envEnv2, envEnv;
-	env = EnvGen.ar(Env.linen(0.1, dur, 0.1, amp)); 
+	env = EnvGen.ar(Env.linen(0.1, dur, 0.1, amp), doneAction:2); 
 
-	envEnv = SinOsc.ar(20, 1.0.rand, 0.5, 0.5);
+	envEnv = SinOsc.ar(25, 1.0.rand, 0.5, 0.5);
 	
 	signal = SinOsc.ar(XLine.ar(freqlo,freqhi, dur)) * env *envEnv;
 	Out.ar(0, signal ! 2);
@@ -82,13 +82,13 @@ Out.ar(0, GrainSin.ar(2, Impulse.ar(grain_freq), grain_dur, freq, pan, -1, 2048)
 }).load();
 )
 
-a = Synth(\up_whistle, [\freqlo, 2500, \freqhi, 3100, \dur, 0.3, \amp, 0.2]);
-
+a = Synth(\up_whistle, [\freqlo, 2500, \freqhi, 3100, \dur, rrand(0.1, 0.3), \amp, 0.2]);
+a.free;
 (
 {
 
 inf.do({
-	Synth(\up_whistle, [\freqlo, 2600, \freqhi, 2850, \dur, rrand(0.2,0.5), \amp, 0.2]);
+	a = Synth(\up_whistle, [\freqlo, 2600, \freqhi, rrand(2825.0, 2875.0), \dur, rrand(0.1,0.3), \amp, rrand(0.2, 0.3)]);
 	rrand(1.0, 2.0).wait;
 });
 }.fork;
@@ -96,12 +96,12 @@ inf.do({
 {
 rand(0.5).wait;
 inf.do({
-	Synth(\up_trill, [\freqlo, 2600, \freqhi, 3000, \dur, rrand(0.3,0.5)]);
+	a = Synth(\up_trill, [\freqlo, 2600, \freqhi, rrand(2900,3000), \dur, rrand(0.1,0.3)]);
 	rrand(1.0, 2.0).wait;
 });
 }.fork;
 
-a = Synth(\sin_grain_random, [\amp, 0.2, \grain_dur, 0.035, \grain_freq, 40.0, \dur, 3600, \freq, 880]);
+a = Synth(\sin_grain_random, [\amp, 0.1, \grain_dur, 0.035, \grain_freq, 40.0, \dur, 3600, \freq, 880]);
 
 )
 
