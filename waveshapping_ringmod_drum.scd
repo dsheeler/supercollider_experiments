@@ -53,7 +53,7 @@ SynthDef("waveshaping_ringmod_drum", { arg freq=440, amp=0.9, gate;
 )
 
 
-a = Synth("waveshaping_ringmod_drum", [\freq, 60]);
+a = Synth("waveshaping_ringmod_drum", [\freq, 120, \amp, 0.9, \gate, 1]);
 a.set(\gate, 1);
 a.set(\gate, 0);
 

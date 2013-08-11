@@ -27,7 +27,7 @@ SynthDef("risset_clarinet_pg_153", { arg freq=440, amp=0.2, gate;
 }).writeDefFile;
 Server.local.sendMsg("/d_load", SynthDef.synthDefDir ++ "risset_clarinet_pg_153.scsyndef");
 )
-
+(
 var dur, level;
 
 dur = 2;
@@ -37,7 +37,7 @@ e = Env.linen(2,2.2-(1+0.64), 1, 0.8);
 a = Synth("risset_clarinet_pg_153");
 a.setn(\ampenv, e.asArray);
 a.play(s);
-
+)
 (
 a.set(\gate, 0);
 a.set(\gate, 1);
