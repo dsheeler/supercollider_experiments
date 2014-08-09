@@ -2,8 +2,9 @@
 // SuperCollider Workspace
 // =====================================================================
 s.boot;
-
-zxscdaxdegft Z
+play{{a=SinOsc;l=LFNoise2;a.ar(666*a.ar(l.ar(l.ar(0.5))*9)*RLPF.ar(Saw.ar(9),l.ar(0.5).range(9,999),l.ar(2))).cubed}!2}
+play{{a=SinOsc;a.ar(1e3*a.ar(LFNoise2.ar(0.1ok)*9)).cubed.cubed}!2}
+play{Splay.ar({Pluck.ar(BPF.ar(f=product({|i|product({LFPulse.ar(2**2.rand2,2.rand/2)}!(i+2))/(1+i)+1}!8)*86,43).sin,Saw.ar,1,1/f,9)}!9)}
 
 (
 ?var scale = [60, 62, 64, 65, 67, 69, 71, 72].midicps; // we fill an array with a scale;
@@ -31,7 +32,7 @@ a = Pdef.new(\example1,
 a.play;
 
 b = Pdef.new(\example2,
-	Pbind(\instrument, \detunedSimpleSynth, \amp, 6, \dur, Pseq([1,1,1], inf),
+	Pbind(\instrument, \detunedSimpleSynth, \amp, 6, \dur, Pseq([0.2,0.1,0.1], inf),
 		\freq, Pseq([30, 35, 37].midicps, inf);
 	)
 );
@@ -39,106 +40,130 @@ b = Pdef.new(\example2,
 b.play;
 (
 c = Pdef.new(\example3,
-	Pbind(\instrument, \detunedSimpleSynth, \amp, 25, \dur, Pseq([0.35,
+	Pbind(\instrument, \detunedSimpleSynth, \amp, 2, \dur, Pseq([0.35,0.35]),
 		\freq, Pseq([35, 30].midicps, inf);
 	)
 );
 
 
-		k = Pbind(\instrument, \bassDrum, \freq, 40, \dur, 1, \amp, 0.6).play(quant: TempoClock.default.beats);
-c.play;
+		k = Pbind(\instrument, \bassDrum, \freq, 40, \dur, 3, \amp, 0.6).play(quant: TempoClock.default.beats);
+		c.play;
+	)
+
 )
 a.release();
 a.free;
 
-	a = Synth(\bassDrum, [\freq, 45, \dur, 2, \amp, 1]);
-	b = Synth(\fullkickdrum);
-	c = Synth(\openhat);
-	d = Synth(\closedhat);
-	a = Synth(\perc_grain, [\amp, 1]);
-	a = Synth(\sin_grain);
-	(
-SynthDef(\closedhat, {
+	a = Synth(\bassDrum, [\freq, 55, \dur, 1, \amp, 2]);
+	b = Synth(\snare);
 
-var hatosc, hatenv, hatnoise, hatoutput;
+b.stop;
+b = Synth(\fullkickdrum);
+c = Synth(\openhat);
+d = Synth(\closedhat);
+a = Synth(\perc_grain, [\amp, 1]);
+a = Synth(\sin_grain);
 
-hatnoise = {LPF.ar(WhiteNoise.ar(1),6000)};
+(
+	SynthDef(\closedhat, {
 
-hatosc = {HPF.ar(hatnoise,2000)};
-hatenv = {Line.ar(1, 0, 0.1)};
+		var hatosc, hatenv, hatnoise, hatoutput;
 
-hatoutput = (hatosc * hatenv);
+		hatnoise = {LPF.ar(WhiteNoise.ar(1),6000)};
 
-Out.ar(0,
-Pan2.ar(hatoutput, 0)
-)
+		hatosc = {HPF.ar(hatnoise,2000)};
+		hatenv = {Line.ar(1, 0, 0.1)};
+
+		hatoutput = (hatosc * hatenv);
+
+		Out.ar(0,
+			Pan2.ar(hatoutput, 0)
+		)
+	}).send(s);
+
+	Synth(\inout);
+
+	SynthDef(\inout, {
+		var in;
+		in = In.ar(1, 1);
+		Out.ar(0,in);
+	}).send(s);
+
+	SynthDef(\openhat, {
+
+		var hatosc, hatenv, hatnoise, hatoutput;
+
+		hatnoise = {LPF.ar(WhiteNoise.ar(1),6000)};
+
+		hatosc = {HPF.ar(hatnoise,2000)};
+		hatenv = {Line.ar(1, 0, 0.3)};
+
+		hatoutput = (hatosc * hatenv);
+
+		Out.ar(0,
+			Pan2.ar(hatoutput, 0)
+		);
+	}).send(s);
+
+	SynthDef("risset_clarinet_pg_153", { arg freq=440, amp=0.2, gate;
+		var osc, ampenv, ampenvctl, tfuncenv, buf, tfuncstream;
+
+		tfuncenv = Env.new([-0.8, -0.8, -0.5, 0.5, 0.8, 0.8], [0.39, 0, 0.22, 0, 0.39]);
+
+		buf = Buffer.alloc(s,1024,1);
+
+		t = Signal.fill(512, {arg i; tfuncenv.at(i/512.0)});
+		//t.plot;
+		buf.loadCollection(t.asWavetable);
+
+		ampenv = Env.newClear(3);
+		ampenvctl = Control.names([\ampenv]).kr( ampenv.asArray );
+
+		osc = amp * Shaper.ar(buf, SinOsc.ar(freq, 0, EnvGen.kr(ampenvctl, gate)));
+
+		osc.scope;
+		Out.ar(0, osc)
+	}).writeDefFile;
+	Server.local.sendMsg("/d_load", SynthDef.synthDefDir ++ "risset_clarinet_pg_153.scsyndef");
+
+	SynthDef(\fullkickdrum, {
+
+		var subosc, subenv, suboutput, clickosc, clickenv, clickoutput;
+
+		subosc = {SinOsc.ar(60)};
+		subenv = {Line.ar(1, 0, 1, doneAction: 2)};
+
+		clickosc = {LPF.ar(WhiteNoise.ar(1),1500)};
+		clickenv = {Line.ar(1, 0, 0.02)};
+
+		suboutput = (subosc * subenv);
+		clickoutput = (clickosc * clickenv);
+
+		Out.ar(0,
+			Pan2.ar(suboutput + clickoutput, 0);
+		)
+
+	}).send(s);
+
+	SynthDef(\looch, {|freq=75.0, amp=1, pan=0.0, dur=1|
+		var signal, env;
+		env = EnvGen.ar(Env.perc(level:amp, attackTime:0.0001, releaseTime:dur), doneAction:2);
+		signal = env*SinOsc.ar(Line.kr(1, 0, 0.05, 2*freq, freq));
+		signal = Pan2.ar(signal, pan);
+		Out.ar(0, signal);
+	}).send(s);
+
+SynthDef(\snare, {|freq=180, amp=1, dur=0.2, cutoff=6000|
+	var snarenoise, snareosc, snareenv, snareout, env, signal;
+	env = EnvGen.ar(Env.perc(level:amp, attackTime:0.0001, releaseTime:dur), doneAction:2);
+	signal = SinOsc.ar(freq);
+	//snareenv = EnvGen.ar(Env.new([0,1,0.25,0.25,0], [0.01,0.02,0.2,0.1]), doneAction:2);
+	snareout = env * (signal + LPF.ar(WhiteNoise.ar(amp),cutoff));
+	Out.ar(0, Pan2.ar(snareout, 0));
 }).send(s);
 
-
-		SynthDef(\openhat, {
-
-var hatosc, hatenv, hatnoise, hatoutput;
-
-hatnoise = {LPF.ar(WhiteNoise.ar(1),6000)};
-
-hatosc = {HPF.ar(hatnoise,2000)};
-hatenv = {Line.ar(1, 0, 0.3)};
-
-hatoutput = (hatosc * hatenv);
-
-Out.ar(0,
-Pan2.ar(hatoutput, 0)
-			);
-		}).send(s);
-
-SynthDef("risset_clarinet_pg_153", { arg freq=440, amp=0.2, gate;
-	var osc, ampenv, ampenvctl, tfuncenv, buf, tfuncstream;
-
-	tfuncenv = Env.new([-0.8, -0.8, -0.5, 0.5, 0.8, 0.8], [0.39, 0, 0.22, 0, 0.39]);
-
-	buf = Buffer.alloc(s,1024,1);
-
-	t = Signal.fill(512, {arg i; tfuncenv.at(i/512.0)});
-	//t.plot;
-	buf.loadCollection(t.asWavetable);
-
-	ampenv = Env.newClear(3);
-	ampenvctl = Control.names([\ampenv]).kr( ampenv.asArray );
-
-	osc = amp * Shaper.ar(buf, SinOsc.ar(freq, 0, EnvGen.kr(ampenvctl, gate)));
-
-	osc.scope;
-	Out.ar(0, osc)
-}).writeDefFile;
-Server.local.sendMsg("/d_load", SynthDef.synthDefDir ++ "risset_clarinet_pg_153.scsyndef");
-
-SynthDef(\fullkickdrum, {
-
-    var subosc, subenv, suboutput, clickosc, clickenv, clickoutput;
-
-    subosc = {SinOsc.ar(60)};
-    subenv = {Line.ar(1, 0, 1, doneAction: 2)};
-
-    clickosc = {LPF.ar(WhiteNoise.ar(1),1500)};
-    clickenv = {Line.ar(1, 0, 0.02)};
-
-    suboutput = (subosc * subenv);
-    clickoutput = (clickosc * clickenv);
-
-    Out.ar(0,
-        Pan2.ar(suboutput + clickoutput, 0);
-    )
-
-}).send(s);
-
-SynthDef(\looch, {|freq=75.0, amp=1, pan=0.0, dur=1|
-			var signal, env;
-			env = EnvGen.ar(Env.perc(level:amp, attackTime:0.0001, releaseTime:dur), doneAction:2);
-			signal = env*SinOsc.ar(Line.kr(1, 0, 0.05, 2*freq, freq));
-			signal = Pan2.ar(signal, pan);
-			Out.ar(0, signal);
-		}).send(s);
-
+a = Synth(\snare, [\freq, 126, \cutoff, 4000, \dur, 0.4]);
+b = Synth(\bassDrum);
 SynthDef(\bassDrum, {|freq=75.0, amp=1, pan=0.0, dur=1, out=0|
 			var signal, env;
 			env = EnvGen.ar(Env.perc(level:amp, attackTime:0.0001, releaseTime:dur), doneAction:2);
@@ -248,7 +273,7 @@ SynthDef(\ks_guitar2, { arg note, pan=0.0, rand=160, delayTime=20, noiseType=1;
 	Out.ar(0, LeakDC.ar(x));
 }).store;
 
-SynthDef(\ks_guitar, { arg note, pan=0.0, rand=160, delayTime=20, noiseType=1;
+SynthDef(\ks_guitar, { arg note, pan=0.0, rand=160, delayTime=20, noiseType=1, out=0;
 	var signal, x, y, env, specs, freqs, res, dec;
 	//env = Env.new(#[1.9, 1.9, 0],#[10, 0.001]);
 	// A simple exciter x, with some randomness.
@@ -263,7 +288,7 @@ SynthDef(\ks_guitar, { arg note, pan=0.0, rand=160, delayTime=20, noiseType=1;
 	//	x = CombC.ar(signal, 0.6, 0.25, 10.0, EnvGen.ar(env, doneAction:2));
 	x = Pan2.ar(x, pan);
 
-	Out.ar(0, LeakDC.ar(x));
+	Out.ar(out, LeakDC.ar(x));
 }).store;
 
 SynthDef(\sin_grain_random, {arg freq, amp, grain_dur, dur=1, grain_freq, gate=1;
@@ -367,7 +392,7 @@ a = Pdef.new(\example1,
 
 a.play;
 
-a =	Synth(\ks_guitar, [\note, 82.0, \pan, 0, \rand, 60, \delayTime, 2.5]);
+a =	Synth(\ks_guitar, [\note, 164.0, \pan, 0, \rand, 600, \delayTime, 102.5]);
 a = Synth(\resonators, [\f, 40, \n, 20]);
 (
 //f = 80.00;
@@ -400,7 +425,7 @@ d = 5;
 
 {
 	inf.do({
-		a = Synth(\cricket,  [\out, ~dryout, \freq, exprand(2300, 2700), \freqtrill, exprand(30.0,30.0), \dur, rrand(15, 25), \amp, rrand(0.0005, 0.0007), \pan, rrand(-1,1)]);
+		a = Synth(\cricket,  [\out, ~dryout, \freq, exprand(2300, 2700), \freqtrill, exprand(30.0,30.0), \dur, rrand(15, 25), \amp, rrand(0.015, 0.017), \pan, rrand(-1,1)]);
 		rrand(1, 2).wait;
 	});
 }.fork;
@@ -409,7 +434,7 @@ d = 5;
 	~dryout = Bus.audio(s,2);
 	~verbal = Synth(\omgverb, [\in, ~dryout], addAction: \addToTail);{
 	inf.do({
-		a = Synth(\up_trill, [\out, ~dryout, \freqlo, exprand(2800.0, 2900.0), \freqhi, exprand(3100.0, 3300.0), \dur, rrand(0.15, 0.22), \amp, rrand(0.0005, 0.0010), \pan, rrand(-1,1)]);
+		a = Synth(\up_trill, [\out, ~dryout, \freqlo, exprand(2800.0, 2900.0), \freqhi, exprand(3100.0, 3300.0), \dur, rrand(0.15, 0.22), \amp, rrand(0.005, 0.010), \pan, rrand(-1,1)]);
 		rand(0.01).wait;
 	});
 
@@ -442,20 +467,20 @@ w = Synth(\wind, [\dur, 200.0.rand, \freqlo, exprand(100, 4000.0), \freqhi, expr
 
 }.fork;
 )
-
- c = Synth(\chimes, [\amp, 1308.9125, \dens, 3.95, \dur, 2000.0]);
-c.free;
 (
 fork({
 inf.do({
 
-a = Synth(\up_whistle, [\freqlo, 80, \freqhi, 200, \dur, rrand(1, 5), \amp, 0.1, \pan, 0]);
+		a = Synth(\up_whistle, [\freqlo, rrand(20, 30), \freqhi, rrand(100,120), \dur, rrand(5, 15), \amp, 0.1, \pan, 0]);
 rrand(0.5, 0.9).wait();
 	//a.free;
 
 });
 });
 )
+
+ c = Synth(\chimes, [\amp, 1308.9125, \dens, 3.95, \dur, 2000.0]);
+c.free;
 a = Synth(\up_trill, [\freqlo, 2166, \freqhi, 2666, \dur, 0.18, \amp, 0.9, \pan, 0]);
 a.free;
 (
@@ -552,9 +577,9 @@ b.free;
 )
 
 a = Synth(\sin_grain_random, [\amp, 0.2, \grain_dur, 0.055, \grain_freq, 0.01, \dur, 10, \freq, 11]);
-a.free;
-a = Synth(\sin_grain, [\amp, 5, \grain_dur, 0.000591566, \grain_freq, 20,   \dur, 11.6, \freq, 500]);
 a = Synth(\sin_grain, [\amp, 1.0, \grain_dur, 0.00155002, \grain_freq, 10, \dur, 90, \freq, 2000]);
+a.free;
+a = Synth(\sin_grain, [\amp, 2, \grain_dur, 0.0001591566, \grain_freq, 6000,   \dur, 11.6, \freq, 100]);
 a = Synth(\sin_grain, [\amp, 0.01, \grain_dur, 0.0505002, \grain_freq, 10, \dur, 20, \freq, 500]);
 
 a.set(\gate, 0);
@@ -610,7 +635,8 @@ l = Task({
 		});
 	});
 });
-
+a = Synth(\omgverb, [\in, 0, \out, 0]);
+a.play();
 l.play();
 (
 t = Task({
@@ -622,14 +648,14 @@ t = Task({
 	freqs2 = List[72, 76, 79, 81, 83];
 	lowfreqs = List[36, 40, 43, 48, 52];
 	~dryout = Bus.audio(s,2);
-	~flange = 0;//Bus.audio(s,2);
+	~flange = Bus.audio(s,2);
 	~master = Bus.audio(s,2);
 
 
-	//Synth(\omgflange, [\in, ~dryout, \out, ~flange, \amp, 0.002, \center, 0.004, \freq, 0.001], addAction: \addToTail);
-    Synth(\omgverb, [\in, ~dryout, \out, ~flange], addAction: \addToTail);
+	Synth(\omgflange, [\in, ~dryout, \out, 0, \amp, 0.02, \center, 0.04, \freq, 0.1], addAction: \addToTail);
+    //Synth(\omgverb, [\in, ~flange, \out, ~master], addAction: \addToTail);
 
-	//Synth(\omgcompress, [\in, ~flange], addAction: \addToTail);
+	//Synth(\omgcompress, [\in, ~master], addAction: \addToTail);
 
 	freqs = (72.rand + lowfreqs).midicps;
 	inf.do({(
@@ -658,15 +684,16 @@ t = Task({
 				//});
 				//});
 			 if (guitarPlayed == 0, {
-			 	if (0.125.coin, {
-					guitarPlayed = 1;
+			 	if (1.coin, {
+					//guitarPlayed = 1;
 			 		{
 			 			20.do({
 			 				var freq = freqs.at(freqs.size.rand);
 			 				Synth(\ks_guitar, [\note, freq,
 			 					\pan, 1.0.rand2,
-			 					\rand, 0.1+0.1.rand,
-			 					\delayTime, 2+1.0.rand]);
+								\rand, rrand(30.0,50.0),
+			 					\delayTime, 2+1.0.rand,
+							    \out, ~dryout]);
 
 			 				(rrand(0.25, 0.5)).wait;
 			 			});
@@ -699,7 +726,7 @@ t = Task({
 			// //		a = Synth(\sin_grain, [\amp,  1000, \grain_dur, 0.0001, \grain_freq, 10, \dur, 15, \freq, 22]);
 			// 	//				a = Synth(\sin_grain, [\amp,  0.0879323, \grain_dur, 0.0035532, \grain_freq, 651.32759, \dur, 15, \freq, 446.551]);
 			// 	//a = Synth(\sin_grain, [\amp,  2.00079323, \grain_dur, 0.001532, \grain_freq, 51.32759, \dur, 55, \freq, 666.551]);
-			if(false, {
+			if(0.5.coin, {
 				(
 				{
 					var grain_dur, grain_freq, freq, dur, amp;
@@ -720,8 +747,8 @@ t = Task({
 			if(0.5.coin, {
 
 				var myfreqs, dur;
-				myfreqs = Pseq([45], 1).asStream;
-				dur = Pseq([1], 1).asStream;
+				myfreqs = Pseq([45, 40, 35, 30], 1).asStream;
+				dur = Pseq([0.5,0.5,0.5,0.5], 1).asStream;
 				r = Task({
 					var delta;
 					var freq;
@@ -760,10 +787,10 @@ t = Task({
 
 			dur = (1.0.rand() * 20 ) + 10.0;
 	 		index = freqs.size.rand();
-	 		freq = freqs.at(index);
 
 
 	 		amp = 0.96;
+	 		freq = freqs.at(index);
 	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -1.0, \dur, dur, \amp, (amp*500.0/freq)]);
 	 		1.0.rand.wait();
 			dur = dur + 1.0.rand();
@@ -781,9 +808,7 @@ t = Task({
 
 	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -0.6, \dur, dur, \amp, (amp*500.0/freq)]);
 
-
-
-			1.0.rand.wait();
+		1.0.rand.wait();
 		});
 		(1.0.rand() + 8.0).wait();
 	)});
@@ -796,6 +821,63 @@ t.play();
 t.play();
 t.pause();
 t.free();
+
+
+(
+t = Task({
+	var dur, freq, freqs, freqs1, freqs2, lowfreqs, waitTime, amp, index, guitarPlayed=0;
+	var repsOfSameTones = 2;
+	var toneCount = 0;
+	amp = 80;
+	freqs1 = List[60, 64, 67]; // we fill an array with a scale;
+	freqs2 = List[72, 76, 79, 81, 83];
+	lowfreqs = List[36, 40, 43, 48, 52];
+	~dryout = Bus.audio(s,2);
+	~flange = 0;//Bus.audio(s,2);
+	~master = Bus.audio(s,2);
+
+
+	//Synth(\omgflange, [\in, ~dryout, \out, ~flange, \amp, 0.002, \center, 0.004, \freq, 0.001], addAction: \addToTail);
+    //Synth(\omgverb, [\in, ~dryout, \out, ~flange], addAction: \addToTail);
+
+	Synth(\omgcompress, [\in, ~dryout], addAction: \addToTail);
+
+	freqs = (72.rand + lowfreqs).midicps;
+	inf.do({(
+			if(0.5.coin, {
+
+				var myfreqs, dur;
+				myfreqs = Pseq([45, 40, 35, 30], 1).asStream;
+				dur = Pseq([0.5,0.5,0.5,0.5], 1).asStream;
+				r = Task({
+					var delta;
+					var freq;
+					while {
+						delta = dur.next;
+						freq = myfreqs.next;
+						delta.notNil;
+
+					} {
+						Synth(\bassDrum, [\freq, freq, \out, ~dryout, \amp, 0.15] );
+						delta.yield;
+					}
+				}).play(quant: TempoClock.default.beats);
+
+
+
+
+				 // 	var freq = freqs.at(freqs.size.rand);
+				 // 	Synth(\sin_grain_random, [\amp, 0.15, \grain_dur, 0.025, \grain_freq, 25, \dur, 5.0.rand + 5.0, \freq, freq]);
+
+			});
+
+		1.0.wait();
+	)});
+});
+
+t.play();
+
+)
 
 (
 
