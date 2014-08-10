@@ -641,177 +641,53 @@ l.play();
 (
 t = Task({
 	var dur, freq, freqs, freqs1, freqs2, lowfreqs, waitTime, amp, index, guitarPlayed=0;
-	var repsOfSameTones = 2;
+	var repsOfSameTones = 8;
 	var toneCount = 0;
+	var count = 0;
 	amp = 80;
+	dur = 5;
 	freqs1 = List[60, 64, 67]; // we fill an array with a scale;
 	freqs2 = List[72, 76, 79, 81, 83];
-	lowfreqs = List[36, 40, 43, 48, 52];
-	~dryout = Bus.audio(s,2);
+	lowfreqs = List[36, 39, 43, 48, 51];
+	~dryout = 0;//Bus.audio(s,2);
 	~flange = Bus.audio(s,2);
 	~master = Bus.audio(s,2);
 
 
-	Synth(\omgflange, [\in, ~dryout, \out, 0, \amp, 0.02, \center, 0.04, \freq, 0.1], addAction: \addToTail);
-    //Synth(\omgverb, [\in, ~flange, \out, ~master], addAction: \addToTail);
+	//Synth(\omgflange, [\in, ~dryout, \out, 0, \amp, 0.02, \center, 0.04, \freq, 0.1], addAction: \addToTail);
+    //Synth(\omgverb, [\in, ~dryout, \out, 0], addAction: \addToTail);
 
 	//Synth(\omgcompress, [\in, ~master], addAction: \addToTail);
 
-	freqs = (72.rand + lowfreqs).midicps;
-	inf.do({(
-		toneCount = toneCount + 1;
-		if (toneCount >= repsOfSameTones, {
-			toneCount = 0;
-			freqs = (72.rand + lowfreqs).midicps;// ++ (72.rand + lowfreqs).midicps;
+	freqs = (lowfreqs).midicps;
+	inf.do({
+		count = (count + 7) % 48;
+		freqs = (count + lowfreqs).midicps;
+		repsOfSameTones.do({
+			index = freqs.size.rand();
+			amp = 1;
+			freq = freqs.at(index);
+			Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -1.0, \dur, dur, \amp, amp]);
+			0.1.rand.wait();
+			dur = dur - dur * 0.01.rand();
+			freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
+
+			Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, 1.0, \dur, dur, \amp, amp]);
+			0.1.rand.wait();
+			dur = dur - dur * 0.01.rand();
+			freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
+
+			Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, 0.6, \dur, dur, \amp, amp]);
+			0.1.rand.wait();
+			dur = dur - dur * 0.01.rand();
+			freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
+
+			Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -0.6, \dur, dur, \amp, amp]);
+			0.1.rand.wait();
 
 		});
-		//freqs = List[20, 40, 60, 100, 160, 260, 420, 680, 1100, 1780, 2880, 4660, 7540, 12400];
-
-		//freqs = List[160, 119.8645 106.787, 134.543];
-		guitarPlayed = 0;
-		8.do({
-
-
-			//if (0.4.coin, {
-			//	var dur =  rrand(10.0, 30.0);
-			//	var amp = rrand (1.0, 2.0);
-			//		var freqhi = rrand(200.0, 800.0);
-			//	var freqlo = rrand(200.0, 800.0);
-
-				//				Synth(\wind, [\dur, dur, \amp, amp, \freqlo, freqlo, \freqhi, freqhi]);
-				//if (amp > 1.0, {
-				//	Synth(\chimes, [\dur, dur, \amp, 0.8*log(freqhi), \dens, 0.1*log(freqhi)]);
-				//});
-				//});
-			 if (guitarPlayed == 0, {
-			 	if (1.coin, {
-					//guitarPlayed = 1;
-			 		{
-			 			20.do({
-			 				var freq = freqs.at(freqs.size.rand);
-			 				Synth(\ks_guitar, [\note, freq,
-			 					\pan, 1.0.rand2,
-								\rand, rrand(30.0,50.0),
-			 					\delayTime, 2+1.0.rand,
-							    \out, ~dryout]);
-
-			 				(rrand(0.25, 0.5)).wait;
-			 			});
-			 		}.fork;
-			 	});
-			 });
-
-			//a = Synth(\sin_grain, [\amp, 2.921199265507, \freq, 74.016651942682, \grain_dur, 0.00134963384496, \grain_freq, 50, \dur, 24]);
-
-			// (
-
-
-				(
-				if (0.125.coin, {
-				{
-
-					var grain_dur, grain_freq, sin_freq, sin_dur, env_amp;
-					rrand(0,5).sleep();
-					sin_freq = exprand(22, 66.6);
-			 		sin_dur = rrand(10,25);//25.0.rand() + 5.0;
-					grain_dur = exprand(0.001, 0.01); // rrand(0.0001, 0.002);//0.008);
-			 		grain_freq = rrand(2,52);// exprand(66,66);// rand2(5.0) + 22.0;
-			 		env_amp = 0.0001 / (grain_dur ** (2/3) * log(sin_freq) ** 3);
-					"amp % freq % grain_dur % grain_freq % dur %\n".postf(env_amp, sin_freq, grain_dur, grain_freq, sin_dur);
-			 		a = Synth(\sin_grain, [\out, ~dryout, \amp,  env_amp, \grain_dur, grain_dur, \grain_freq, grain_freq, \dur, sin_dur, \freq, sin_freq]);
-				}.fork();
-				});
-			 	);
-
-			// //		a = Synth(\sin_grain, [\amp,  1000, \grain_dur, 0.0001, \grain_freq, 10, \dur, 15, \freq, 22]);
-			// 	//				a = Synth(\sin_grain, [\amp,  0.0879323, \grain_dur, 0.0035532, \grain_freq, 651.32759, \dur, 15, \freq, 446.551]);
-			// 	//a = Synth(\sin_grain, [\amp,  2.00079323, \grain_dur, 0.001532, \grain_freq, 51.32759, \dur, 55, \freq, 666.551]);
-			if(0.5.coin, {
-				(
-				{
-					var grain_dur, grain_freq, freq, dur, amp;
-					rrand(0,5).sleep();
-						freq = exprand(40, 88);
-					dur = rrand(10,25);//25.0.rand() + 5.0;
-					grain_dur = exprand(0.01, 0.0666); // rrand(0.0001, 0.002);//0.008);
-					grain_freq = exprand(15,25);// rand2(5.0) + 22.0;
-					amp = 0.25 / (log(grain_freq)  * grain_dur ** (2/3) * log(freq) ** (4/5));//;0.5;//50/(grain_freq * freq);
-					"amp % freq % grain_dur % grain_freq % dur %\n".postf(amp, freq, grain_dur, grain_freq, dur);
-					("a = Synth(\'sin_grain\', [\'amp\',  %, \'grain_dur\', %, \'grain_freq\', %, \'dur\', %, \'freq\', %])").postf(amp, grain_dur, grain_freq, dur, freq);
-					a = Synth(\perc_grain, [\amp,  amp, \grain_dur, grain_dur, \grain_freq, grain_freq, \dur, dur, \freq, freq, \out, ~dryout]);
-				}.fork();
-				)
-			});
-
-
-			if(0.5.coin, {
-
-				var myfreqs, dur;
-				myfreqs = Pseq([45, 40, 35, 30], 1).asStream;
-				dur = Pseq([0.5,0.5,0.5,0.5], 1).asStream;
-				r = Task({
-					var delta;
-					var freq;
-					while {
-						delta = dur.next;
-						freq = myfreqs.next;
-						delta.notNil;
-
-					} {
-						Synth(\bassDrum, [\freq, freq, \out, ~dryout, \amp, 0.15] );
-						delta.yield;
-					}
-				}).play(quant: TempoClock.default.beats);
-
-
-
-
-				 // 	var freq = freqs.at(freqs.size.rand);
-				 // 	Synth(\sin_grain_random, [\amp, 0.15, \grain_dur, 0.025, \grain_freq, 25, \dur, 5.0.rand + 5.0, \freq, freq]);
-
-			});
-
-
-
-			if (false, {
-
-				8.do({
-					dur = 0.325;
-					index = freqs2.size.rand();
-					freq = freqs2[index];
-					amp = 5.66;
-					Synth(\detunedSimpleSynth, [\freq, freq, \pan, rrand(-1.0, 1.0), \dur, dur, \amp, (amp*50.0/freq)]);
-					dur.wait();
-				})
-			});
-
-			dur = (1.0.rand() * 20 ) + 10.0;
-	 		index = freqs.size.rand();
-
-
-	 		amp = 0.96;
-	 		freq = freqs.at(index);
-	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -1.0, \dur, dur, \amp, (amp*500.0/freq)]);
-	 		1.0.rand.wait();
-			dur = dur + 1.0.rand();
-	 		freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
-
-	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, 1.0, \dur, dur, \amp, (amp*500.0/freq)]);
-	 		1.0.rand.wait();
-	 		dur = dur + 1.0.rand();
-	 		freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
-
-	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, 0.6, \dur, dur, \amp, (amp*500.0/freq)]);
-			1.0.rand.wait();
-	 		dur = dur + 1.0.rand();
-	 		freq = freq + (rrand(-1.0, 1.0) * freq * 0.0069);
-
-	 		Synth(\simpleSynth, [\out, ~dryout, \freq, freq, \pan, -0.6, \dur, dur, \amp, (amp*500.0/freq)]);
-
-		1.0.rand.wait();
-		});
-		(1.0.rand() + 8.0).wait();
-	)});
+		dur.wait();
+	});
 });
 
 t.play();
@@ -1155,35 +1031,25 @@ r = Task({
     }
 }).play(quant: TempoClock.default.beats + 1.0);
 )
+
+
+
 (
-var midi,midi2,dur;
-midi = Pseq([60, 60, 60, 60, 64, 64, 65, 65, 65, 65, 67], 4).asStream;
-midi2 = Pseq([67, 67, 67, 67, 71, 71, 72, 72, 72, 72, 74], 4).asStream;
-
-dur = Pseq([0.5, 0.5, 0.25, 0.25, 0.25,0.25, 0.25, 0.25, 0.25, 0.25, 1], 4).asStream;
-
-SynthDef(\smooth, { |freq = 440, sustain = 0.25, amp = 0.25|
-    var sig, n;
-	n = 4;
-    sig =  Mix.fill(n, { SinOsc.ar(freq + freq.rand, 0, 1 / (n*n)) }) * EnvGen.kr(Env.linen(0.05, sustain, 0.1), doneAction: 2);
-	//SinOsc.ar(freq, 0, amp) * EnvGen.kr(Env.linen(0.05, sustain, 0.1), doneAction: 2);
-    Out.ar(0, sig ! 2)
-}).add;
-
-midi = Pseq([67, 65, 64, 60], 8).asStream;
-dur = Pseq([1, 1, 1, 1], 8).asStream;
+var dur, amp;
+amp = 1.0;
+dur = Pseq([0.5,0.5,0.5,0.5], inf).asStream;
 r = Task({
-    var delta;
-    while {
-        delta = dur.next;
-        delta.notNil
-    } {
-        Synth(\detunedSimpleSynth, [freq: midi.next.midicps, dur: 0.75* delta]);
-        Synth(\, [freq: midi2.next.midicps, dur: 0.75* delta]);
-        delta.yield;
-    }
-}).play(quant: TempoClock.default.beats + 1.0);
+	var delta;
+	while {
+		delta = dur.next;
+		delta.notNil;
+	} {
+		Synth(\bassDrum, [\freq, 30, \out, ~dryout, \amp, amp] );
+		(0.5*delta).yield;
+		Synth(\bassDrum, [\freq, 30, \out, ~dryout, \amp, amp] );
+		(0.5*delta).yield;
+		Synth(\snare, [\amp, amp]);
+		delta.yield;
+	}
+}).play(quant: TempoClock.default.beats);
 )
-
-
-
